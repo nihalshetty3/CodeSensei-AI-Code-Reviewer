@@ -12,3 +12,4 @@ Then it gives you back a full annotated review: exactly which line is wrong, why
 The "agentic" part means it doesn't just do one thing — it plans what to check, decides which tools to use, calls those tools, reads the results, and synthesizes everything into a coherent review. It thinks in steps, not in one shot.
 
 
+<img width="661" height="475" alt="image" src="https://github.com/user-attachments/assets/91f3e5f9-05d3-42a4-824e-04bce9a0306a" />

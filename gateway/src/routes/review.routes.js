@@ -1,11 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
-router.post("/review" , (req , res) =>{
-    res.json({
-        success:true,
-        message: "Review endpoint working",
-    });
-});
+const {
+    reviewCode
+} = require("../controllers/review.controller");
 
+router.post("/review", reviewCode);
 module.exports = router;

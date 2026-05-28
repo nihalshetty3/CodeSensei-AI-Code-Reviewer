@@ -9,46 +9,124 @@ client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
 
+def cleaned_review(review):
+    
+    categories = [
+        "bugs", 
+        "security",
+        "performance",
+        "code_quality"
+    ]
+    
+    cleaned= {}
+    
+    for category in categories:
+        
+        cleaned[category] = []
+        
+        seen_issues = set()
+        
+        issues = review.get(category , [])
+        
+        for issue in issues:
+            
+            issue_text = issue.get("issue" , "").strip()
+            
+            explanation =( 
+            issue.get("explaination" , "")
+            or issue.get("explanation")
+            or ""
+            ).strip()
+            
+            fix = issue.get("fix" , "").strip()
+            
+            severity = issue.get("severity" , "low").lower()
+            
+            line = issue.get("line" , 0)
+            
+            #skip if issues are empty
+            
+            if not issue_text:
+                continue
+            
+            # remove duplicates
+            if issue_text in seen_issues:
+                continue
+            
+            seen_issues.add(issue_text)
+            
+            if severity not in [
+                "low",
+                "medium",
+                "high",
+                "critical"
+            ]:
+                severity = "low"
+                
+            cleaned[category].append({
+                "line": line,
+                "severity": severity,
+                "issue": issue_text,
+                "explanation": explanation,
+                "fix": fix
+            })
+    
+    return cleaned
+
 def generate_review(code, language):
 
     prompt = f"""
-You are a senior software engineer.
+You are an expert senior software engineer and static code analyzer.
 
-Analyze the following {language} code.
+Analyze the following {language} code carefully.
 
-Return ONLY valid JSON.
+Detect:
+- bugs
+- runtime errors
+- undefined variables
+- logical issues
+- syntax problems
+- security vulnerabilities
+- performance problems
+- code quality issues
 
-JSON format:
+IMPORTANT:
+- Analyze code line-by-line carefully.
+- Only report issues directly observable in the code.
+- Do not generate hypothetical issues.
+- Do not invent variable values, array indices, or behaviors.
+- Detect undefined variables and naming mismatches.
+- Avoid duplicate issues.
+- ONLY use these categories:
+  bugs
+  security
+  performance
+  code_quality
+- Do not create additional categories.
+- Every issue must include:
+  - line
+  - severity
+  - issue
+  - explanation
+  - fix
+- If no issues exist for a category, return [].
+- Return ONLY valid JSON.
+
+Return JSON in this format:
 
 {{
   "bugs": [
     {{
+      "line": 0,
+      "severity": "high",
       "issue": "",
       "explanation": "",
       "fix": ""
     }}
   ],
-  "security": [
-    {{
-      "issue": "",
-      "explanation": "",
-      "fix": ""
-    }}
-  ],
-  "performance": [
-    {{
-      "issue": "",
-      "explanation": "",
-      "fix": ""
-    }}
-  ],
-  "code_quality": [
-    {{
-      "issue": "",
-      "explanation": "",
-      "fix": ""
-    }}
-  ]
+  "security": [],
+  "performance": [],
+  "code_quality": []
 }}
 
 Code:
@@ -75,5 +153,8 @@ Code:
 
     response_text = chat_completion.choices[0].message.content
     print(response_text)
+      
+    review_json = json.loads(response_text)
+    cleaned= cleaned_review(review_json)
 
-    return json.loads(response_text)
+    return cleaned

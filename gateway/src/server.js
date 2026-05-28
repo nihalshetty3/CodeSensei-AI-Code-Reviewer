@@ -1,8 +1,10 @@
+
 const express = require("express");
 
 const reviewRoutes = require("./routes/review.routes");
-
+const cors = require("cors");
 const app = express();
+app.use(cors());
 
 const PORT = 8000;
 
@@ -17,4 +19,4 @@ app.get("/", (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-});
+});   

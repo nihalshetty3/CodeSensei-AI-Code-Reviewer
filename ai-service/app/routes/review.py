@@ -59,3 +59,46 @@ async def upload_review(
         "success": True,
         "files": reviewed_files
     }
+    
+#For Zip parsing logic
+@router.post("/upload-zip-review")
+async def upload_zip_review(
+    file : UploadFile = File(...)
+):
+
+    with tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=".zip"
+    ) as temp_zip:
+        
+        content = await file.read()
+        
+        temp_zip.write(content)
+        
+        temp_zip_path = temp_zip.name 
+        
+    #Extract and parse the entire repository
+    parsed_files = parse_zip(temp_zip_path)
+    
+    reviewed_files = []
+    
+    for parsed_file in parsed_files:
+        
+        review = generate_review(
+            parsed_file["code"],
+            parsed_file["language"]
+        )
+        
+        reviewed_files.append({
+            "filename": parsed_file["filename"],
+            "language": parsed_file["language"],
+            "review": review
+        })
+    
+    os.remove(temp_zip_path)
+    
+    return {
+        "success": True,
+        "total_files": len(reviewed_files),
+        "files": reviewed_files
+    }

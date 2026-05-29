@@ -55,7 +55,7 @@ async def upload_review(
             "review": review
         })
         
-        return {
-            "success": True,
-            "files": reviewed_files
-        }
+    return {
+        "success": True,
+        "files": reviewed_files
+    }

@@ -1,6 +1,7 @@
 node_modules
 .env
 
+
 # Python
 __pycache__/
 *.pyc 
@@ -8,3 +9,5 @@ __pycache__/
 
 # Test files
 test.py 
+
+.venv

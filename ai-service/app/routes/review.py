@@ -3,7 +3,10 @@ from typing import List
 from app.utils.zip_parser import parse_zip
 
 from app.schemas.review_schema import ReviewRequest
-from app.services.review_service import generate_review
+from app.services.review_service import(
+    generate_review,
+    generate_repositoryy_summary
+)
 from app.utils.file_parser import parse_file
 
 import tempfile
@@ -97,8 +100,13 @@ async def upload_zip_review(
     
     os.remove(temp_zip_path)
     
+    summary = generate_repositoryy_summary(
+        reviewed_files
+    )
+    
     return {
         "success": True,
         "total_files": len(reviewed_files),
+        "summary": summary,
         "files": reviewed_files
     }

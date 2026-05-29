@@ -73,7 +73,41 @@ def cleaned_review(review):
     
     return cleaned
 
-
+def generate_repositoryy_summary(reviewed_files):
+    
+    summary = {
+        "total_bugs":0,
+        "security_issues":0,
+        "performance_issues":0, 
+        "high_severity": 0
+    }
+    
+    for file in reviewed_files:
+        review = file["review"]
+        
+        bugs = review.get("bugs" , [])
+        security = review.get("security" , [])
+        performance = review.get("performance" , [])
+        
+        summary["total_bugs"]+= len(bugs)
+        summary["security_issues"]+=len(security)
+        summary["performance_issues"]+=len(performance)
+        
+        for category in [
+            "bugs",
+            "security",
+            "performance",
+            "code_quality"
+        ]:
+            
+            for issue in review.get(category , []):
+                if issue.get("severity") in [
+                    "high", 
+                    "critical"
+                ]:
+                    summary["high_severity"]+=1
+    return summary
+          
 
 def generate_review(code, language):
 

@@ -294,3 +294,37 @@ body {
 }
 
 .green h3 { color: #86efac; }
+
+
+.review-box {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.review-box textarea {
+  width: 500px;
+  height: 200px;
+  border-radius: 12px;
+  padding: 15px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  resize: none;
+}
+
+.submit-btn {
+  width: 180px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #6c63ff;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+} 
+
+
+
+

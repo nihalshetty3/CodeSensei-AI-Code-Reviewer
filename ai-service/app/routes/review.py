@@ -8,6 +8,8 @@ from app.services.review_service import(
     generate_repositoryy_summary
 )
 from app.utils.file_parser import parse_file
+from app.schemas.repository_schema import RepositoryRequest
+from app.utils.repo_parser import parse_repository
 
 import tempfile
 import os
@@ -110,3 +112,42 @@ async def upload_zip_review(
         "summary": summary,
         "files": reviewed_files
     }
+    
+
+#Endpoint for uploading Repo URL
+@router.post("/repository-review")
+async def repository_review(
+    data: RepositoryRequest
+):
+    
+    parsed_files = parse_repository(
+        data.repo_url
+    )
+    
+    reviewed_files = []
+    
+    for parsed_file in parsed_files:
+        review = generate_review(
+            parsed_file["code"],
+            parsed_file["language"]
+        )
+        
+        reviewed_files.append({
+            "filename": parsed_file["filename"],
+            "langauge": parsed_file["language"],
+            "review": review
+        })
+        
+    summary = generate_repositoryy_summary(
+        reviewed_files
+     )
+    
+    return {
+        "success": True,
+        "repository": data.repo_url,
+        "total_files": len(reviewed_files),
+        "summary": summary,
+        "files": reviewed_files
+    }
+        
+    

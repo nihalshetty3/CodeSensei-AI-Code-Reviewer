@@ -183,3 +183,7 @@ Leverage Model Context Protocol (MCP) servers to connect with:
 This will enable deeper repository understanding and agentic code review workflows.
 
 
+### Run commands 
+
+-Front end : npm run dev
+-Backend : Inside ai-servive run ->  uvicorn app.main:app --reload --port 8001

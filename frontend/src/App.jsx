@@ -8,6 +8,7 @@ function App() {
   const [code, setCode] = useState("")
   const [review, setReview] = useState(null)
   const [loading, setLoading] = useState(false)
+const [selectedFiles, setSelectedFiles] = useState([])
 
   const handleReview = async () => {
 
@@ -16,7 +17,7 @@ function App() {
       setLoading(true)
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/review",
+        "http://127.0.0.1:8001/api/review",
         {
           code: code,
           language: "javascript"
@@ -39,11 +40,14 @@ function App() {
   }
 
   return (
+
     <div className="app">
+
+      {/* Navbar */}
 
       <nav className="navbar">
 
-        <div style={{ display:'flex', alignItems:'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           <h1 className="logo">CodeSensei</h1>
           <span className="nav-badge">BETA</span>
         </div>
@@ -51,76 +55,134 @@ function App() {
         <div className="nav-links">
           <span className="nav-link">Docs</span>
           <span className="nav-link">Pricing</span>
-          <button className="nav-btn">Try Review</button>
+
+          <button className="nav-btn">
+            Try Review
+          </button>
         </div>
 
       </nav>
 
+      {/* Hero Section */}
+
       <section className="hero">
 
-        <div className="left">
+       {/* LEFT SIDE */}
 
-          <p className="tag">
-            AI Powered Code Review
-          </p>
+<div className="left">
 
-          <h1>
-            Your AI Senior Developer.
-            <span> Available 24/7.</span>
-          </h1>
+  <p className="tag">
+    AI Powered Code Review
+  </p>
 
-          <p className="description">
-            CodeSensei reviews your code using AI agents,
-            ESLint, security analysis, GitHub integrations,
-            and intelligent reasoning.
-          </p>
+  <h1>
+    Your AI Senior Developer.
+    <span> Available 24/7.</span>
+  </h1>
 
-          <div className="buttons">
+  <div className="buttons">
 
-            <button
-              className="primary-btn"
-              onClick={() => setShowInput(true)}
-            >
-              Start Reviewing
-            </button>
+    <button
+      className="primary-btn"
+      onClick={() => setShowInput(true)}
+    >
+      Start Reviewing
+    </button>
 
-            <button className="secondary-btn">
-              Connect GitHub
-            </button>
+    <button className="secondary-btn">
+      Connect GitHub
+    </button>
 
-          </div>
+  </div>
 
-          {
-            showInput && (
+  {
+    showInput && (
 
-              <div className="review-box">
+      <div className="review-box">
 
-                <textarea
-                  placeholder="Paste your code here..."
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                />
+        <textarea
+          placeholder="Paste code or upload project ZIP..."
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+        />
 
-                <button
-                  className="submit-btn"
-                  onClick={handleReview}
-                >
-                  Review Code
-                </button>
+        <div className="review-actions">
 
-              </div>
+          {/* Upload Button */}
 
+          <label className="upload-btn">
+
+            +
+
+         <input
+  type="file"
+  multiple
+  accept=".zip,.js,.py,.java,.cpp,.txt"
+  hidden
+  onChange={(e) =>
+    setSelectedFiles([...selectedFiles, ...Array.from(e.target.files)])
+  }
+/>
+          </label>
+
+          {/* File Preview */}
+
+         <div className="files-container">
+
+  {
+    selectedFiles.map((file, index) => (
+
+      <div className="file-preview" key={index}>
+
+        <span className="file-name">
+          {file.name}
+        </span>
+
+        <button
+          className="remove-file"
+          onClick={() =>
+            setSelectedFiles(
+              selectedFiles.filter((_, i) => i !== index)
             )
           }
+        >
+          ×
+        </button>
+
+      </div>
+
+    ))
+  }
+
+</div>
+
+          {/* Review Button */}
+
+          <button
+            className="submit-btn"
+            onClick={handleReview}
+          >
+            Review Code
+          </button>
 
         </div>
+
+      </div>
+
+    )
+  }
+
+</div>
+        {/* RIGHT SIDE */}
 
         <div className="review-card">
 
           <div className="card-header">
+
             <span className="card-title">
               Live Review
             </span>
+
           </div>
 
           {
@@ -129,98 +191,106 @@ function App() {
             )
           }
 
-         {
-  review && review.review && (
+          {
+            review && review.review && (
 
-    <div>
+              <div>
 
-    
+                {/* BUGS */}
 
-      {
-        review.review.bugs?.map((bug, index) => (
+                {
+                  review.review.bugs?.map((bug, index) => (
 
-          <div className="issue red" key={index}>
+                    <div className="issue red" key={index}>
 
-            <div className="issue-icon">⚠</div>
+                      <div className="issue-icon">
+                        ⚠
+                      </div>
 
-            <div>
+                      <div>
 
-              <h3>{bug.issue}</h3>
+                        <h3>{bug.issue}</h3>
 
-              <p>{bug.explanation}</p>
+                        <p>{bug.explanation}</p>
 
-              <p>
-                <strong>Fix:</strong> {bug.fix}
-              </p>
+                        <p>
+                          <strong>Fix:</strong> {bug.fix}
+                        </p>
 
-            </div>
+                      </div>
 
-          </div>
+                    </div>
 
-        ))
-      }
+                  ))
+                }
 
-      {/* SECURITY */}
+                {/* SECURITY */}
 
-      {
-        review.review.security?.map((item, index) => (
+                {
+                  review.review.security?.map((item, index) => (
 
-          <div className="issue yellow" key={index}>
+                    <div className="issue yellow" key={index}>
 
-            <div className="issue-icon">🔒</div>
+                      <div className="issue-icon">
+                        🔒
+                      </div>
 
-            <div>
+                      <div>
 
-              <h3>{item.issue}</h3>
+                        <h3>{item.issue}</h3>
 
-              <p>{item.explanation}</p>
+                        <p>{item.explanation}</p>
 
-              <p>
-                <strong>Fix:</strong> {item.fix}
-              </p>
+                        <p>
+                          <strong>Fix:</strong> {item.fix}
+                        </p>
 
-            </div>
+                      </div>
 
-          </div>
+                    </div>
 
-        ))
-      }
+                  ))
+                }
 
-    
+                {/* PERFORMANCE */}
 
-      {
-        review.review.performance?.map((item, index) => (
+                {
+                  review.review.performance?.map((item, index) => (
 
-          <div className="issue green" key={index}>
+                    <div className="issue green" key={index}>
 
-            <div className="issue-icon">🚀</div>
+                      <div className="issue-icon">
+                        🚀
+                      </div>
 
-            <div>
+                      <div>
 
-              <h3>{item.issue}</h3>
+                        <h3>{item.issue}</h3>
 
-              <p>{item.explanation}</p>
+                        <p>{item.explanation}</p>
 
-              <p>
-                <strong>Fix:</strong> {item.fix}
-              </p>
+                        <p>
+                          <strong>Fix:</strong> {item.fix}
+                        </p>
 
-            </div>
+                      </div>
 
-          </div>
+                    </div>
 
-        ))
-      }
+                  ))
+                }
 
-    </div>
+              </div>
 
-  )
-}
+            )
+          }
+
         </div>
 
       </section>
 
     </div>
+
   )
 }
 

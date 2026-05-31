@@ -132,6 +132,9 @@ IMPORTANT:
 - Do not generate hypothetical issues.
 - Do not invent variable values, array indices, or behaviors.
 - Detect undefined variables and naming mismatches.
+- Never assume missing code.
+-Never infer runtime values.
+- Never invent variables.
 - Avoid duplicate issues.
 - ONLY use these categories:
   bugs

@@ -10,34 +10,63 @@ function App() {
   const [loading, setLoading] = useState(false)
 const [selectedFiles, setSelectedFiles] = useState([])
 
-  const handleReview = async () => {
+ const handleReview = async () => {
+  try {
+    setLoading(true);
 
-    try {
+    // FILE REVIEW
+    if (selectedFiles.length > 0) {
 
-      setLoading(true)
+      const formData = new FormData();
+
+      selectedFiles.forEach((file) => {
+        formData.append("files", file);
+      });
 
       const response = await axios.post(
-        "http://127.0.0.1:8001/api/review",
+        "http://127.0.0.1:8001/upload-review",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("File Review Response");
+      console.log(response.data);
+
+      setReview(response.data);
+
+    } else {
+
+      // MANUAL CODE REVIEW
+
+      const response = await axios.post(
+        "http://127.0.0.1:8001/review",
         {
           code: code,
-          language: "javascript"
+          language: "java", // or detect dynamically later
         }
-      )
+      );
 
-      console.log(response.data)
+      console.log("Manual Review Response");
+      console.log(response.data);
 
-      setReview(response.data)
-
-    } catch (error) {
-
-      console.log(error)
-
-    } finally {
-
-      setLoading(false)
-
+      setReview(response.data);
     }
+
+  } catch (error) {
+
+    console.error(error);
+
+  } finally {
+
+    setLoading(false);
+
   }
+};
+  
 
   return (
 
@@ -191,99 +220,73 @@ const [selectedFiles, setSelectedFiles] = useState([])
             )
           }
 
-          {
-            review && review.review && (
+    {
+  review?.files?.map((file, fileIndex) => (
 
-              <div>
+    <div key={fileIndex}>
 
-                {/* BUGS */}
+      <h2>{file.filename}</h2>
 
-                {
-                  review.review.bugs?.map((bug, index) => (
+      {file.review?.bugs?.map((bug, index) => (
 
-                    <div className="issue red" key={index}>
+        <div className="issue red" key={index}>
+          <h3>{bug.issue}</h3>
 
-                      <div className="issue-icon">
-                        ⚠
-                      </div>
+          <p>{bug.explanation}</p>
 
-                      <div>
+          <p>
+            <strong>Fix:</strong> {bug.fix}
+          </p>
+        </div>
 
-                        <h3>{bug.issue}</h3>
+      ))}
 
-                        <p>{bug.explanation}</p>
+      {file.review?.security?.map((item, index) => (
 
-                        <p>
-                          <strong>Fix:</strong> {bug.fix}
-                        </p>
+        <div className="issue yellow" key={index}>
+          <h3>{item.issue}</h3>
 
-                      </div>
+          <p>{item.explanation}</p>
 
-                    </div>
+          <p>
+            <strong>Fix:</strong> {item.fix}
+          </p>
+        </div>
 
-                  ))
-                }
+      ))}
 
-                {/* SECURITY */}
+      {file.review?.performance?.map((item, index) => (
 
-                {
-                  review.review.security?.map((item, index) => (
+        <div className="issue green" key={index}>
+          <h3>{item.issue}</h3>
 
-                    <div className="issue yellow" key={index}>
+          <p>{item.explanation}</p>
 
-                      <div className="issue-icon">
-                        🔒
-                      </div>
+          <p>
+            <strong>Fix:</strong> {item.fix}
+          </p>
+        </div>
 
-                      <div>
+      ))}
 
-                        <h3>{item.issue}</h3>
+      {file.review?.code_quality?.map((item, index) => (
 
-                        <p>{item.explanation}</p>
+        <div className="issue blue" key={index}>
+          <h3>{item.issue}</h3>
 
-                        <p>
-                          <strong>Fix:</strong> {item.fix}
-                        </p>
+          <p>{item.explanation}</p>
 
-                      </div>
+          <p>
+            <strong>Fix:</strong> {item.fix}
+          </p>
+        </div>
 
-                    </div>
+      ))}
 
-                  ))
-                }
+    </div>
 
-                {/* PERFORMANCE */}
-
-                {
-                  review.review.performance?.map((item, index) => (
-
-                    <div className="issue green" key={index}>
-
-                      <div className="issue-icon">
-                        🚀
-                      </div>
-
-                      <div>
-
-                        <h3>{item.issue}</h3>
-
-                        <p>{item.explanation}</p>
-
-                        <p>
-                          <strong>Fix:</strong> {item.fix}
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                  ))
-                }
-
-              </div>
-
-            )
-          }
+  ))
+}
 
         </div>
 

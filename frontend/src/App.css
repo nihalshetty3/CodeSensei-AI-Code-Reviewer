@@ -121,7 +121,7 @@ body {
 .hero {
   width: 100%;
 
-  height: calc(100vh - 80px);
+  min-height: calc(100vh - 80px);
 
   display: grid;
 
@@ -132,10 +132,7 @@ body {
   padding: 40px 50px;
 
   align-items: start;
-
-  overflow: hidden;
 }
-
 .left {
   width: 100%;
 }

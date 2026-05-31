@@ -49,6 +49,15 @@ async def upload_review(
             content
         )
         
+        print("====file===")
+        print(file.filename)
+
+        print("====code===")
+        print(parsed_data["code"])
+
+        print("==language==")
+        print(parsed_data["language"])
+
         review = generate_review(
             parsed_data["code"],
             parsed_data["language"]

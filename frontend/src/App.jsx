@@ -17,7 +17,7 @@ const [selectedFiles, setSelectedFiles] = useState([])
       setLoading(true)
 
       const response = await axios.post(
-        "http://127.0.0.1:8001/api/review",
+        "http://127.0.0.1:8000/api/review",
         {
           code: code,
           language: "javascript"

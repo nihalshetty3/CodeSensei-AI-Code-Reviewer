@@ -10,6 +10,11 @@ from app.services.review_service import(
 from app.utils.file_parser import parse_file
 from app.schemas.repository_schema import RepositoryRequest
 from app.utils.repo_parser import parse_repository
+from app.schemas.pr_review_schema import PRReviewRequest
+from app.services.github_service import (
+    get_pr_files
+)
+from app.utils.language_detector import detect_language
 
 import tempfile
 import os
@@ -150,4 +155,44 @@ async def repository_review(
         "files": reviewed_files
     }
         
+        
+#end point for PR url
+@router.post("/pr-review")
+async def pr_review(
+    data: PRReviewRequest
+):
+    
+    pr_files = get_pr_files(
+        data.pr_url
+    )
+    
+    reviewed_files=[]
+    
+    for file in pr_files:
+        
+        language = detect_language(
+            file["filename"]
+        )
+        review = generate_review(
+            file["patch"],
+            language
+        )
+        
+        reviewed_files.append({
+            "filename": file["filename"],
+            "language" : language,
+            "review": review
+        })
+        
+    summary = generate_repositoryy_summary(
+        reviewed_files
+    )
+    
+    return {
+        "success": True,
+        "pr_url": data.pr_url,
+        "files_reviewed": len(reviewed_files),
+        "summary": summary,
+        "files" : reviewed_files
+    }
     

@@ -318,13 +318,13 @@ body {
 
   justify-content: center;
 
-  font-size: 32px;
+  font-size: 22px;
 
   font-weight: bold;
 
   cursor: pointer;
 
-  transition: 0.2s;
+  transition: 0.5s;
 }
 
 .upload-btn:hover {
@@ -585,4 +585,10 @@ body {
 
 .green h3 {
   color: #86efac;
+}
+
+.upload-options{
+  display:flex;
+  flex-direction:column;
+  gap:15px;   
 }

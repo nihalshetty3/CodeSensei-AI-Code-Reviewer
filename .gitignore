@@ -1,3 +1,11 @@
 node_modules
 .env
-.venv
+
+# Python
+__pycache__/
+*.pyc 
+.venv/
+
+# Test files
+test.py 
+.DS_Store

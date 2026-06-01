@@ -1,6 +1,9 @@
 import os 
 from github import Github
 from app.utils.pr_parser import parse_pr_url
+from app.utils.language_detector import (
+    SUPPORTED_EXTENSIONS
+)
 
 github_client = Github(
     os.getenv("GITHUB_TOKEN")   

@@ -3,6 +3,6 @@ function processPayment(amount){
 
     if(amount > 0)
     {
-        return amount * 100;
+        return amount * 200;
     }
 }

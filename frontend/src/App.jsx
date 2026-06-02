@@ -1,298 +1,424 @@
-import './App.css'
-import { useState } from 'react'
-import axios from 'axios'
+import "./App.css";
+import { useState } from "react";
+import axios from "axios";
 
 function App() {
 
-  const [showInput, setShowInput] = useState(false)
-  const [code, setCode] = useState("")
-  const [review, setReview] = useState(null)
-  const [loading, setLoading] = useState(false)
-const [selectedFiles, setSelectedFiles] = useState([])
-const [selectedZip, setSelectedZip] = useState(null)
-const [uploadType, setUploadType] = useState("")
-const[repoUrl,setRepoUrl]=useState("")
-const[showGithubInput,setShowGithubInput]=useState(false)
-const[prUrl,setPrUrl]=useState("")
+  // =========================
+  // STATES
+  // =========================
+
+  const [showInput, setShowInput] = useState(false);
+  const [showGithubInput, setShowGithubInput] = useState(false);
+
+  const [code, setCode] = useState("");
+  const [review, setReview] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedZip, setSelectedZip] = useState(null);
+
+  const [uploadType, setUploadType] = useState("");
+
+  const [repoUrl, setRepoUrl] = useState("");
+  const [prUrl, setPrUrl] = useState("");
+
+  const BASE_URL = "http://127.0.0.1:8001";
 
 
-const handlePrReview=async()=>{
-       try{
-            setLoading(true)
-             const response = await axios.post(
-      "http://127.0.0.1:8001/pr-review",
-      {
-        pr_url: prUrl
-      }
-    );
-    setReview(response.data);
+  // =========================
+  // REVIEW HANDLERS
+  // =========================
 
-  } catch (error) {
+  const handlePrReview = async () => {
 
-    console.error(error.response?.data);
+    try {
 
-    alert(
-      error.response?.data?.detail ||
-      "Failed to review PR"
-    );
-
-  } finally {
-
-    setLoading(false);
-
-  }
-
-       
-}
-
-const handleGithubReview=async()=>{
-     try{
       setLoading(true);
-      console.log({
-  repo_url: repoUrl
-});
+
+      const response = await axios.post(
+        `${BASE_URL}/pr-review`,
+        {
+          pr_url: prUrl,
+        }
+      );
+
+      setReview(response.data);
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        error.response?.data?.detail ||
+        "Failed to review PR"
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+  };
 
 
-      const response=await axios.post(
-       "http://127.0.0.1:8001/repository-review",
-      {
-        repo_url:repoUrl
+  const handleGithubReview = async () => {
+
+    try {
+
+      setLoading(true);
+
+      const response = await axios.post(
+        `${BASE_URL}/repository-review`,
+        {
+          repo_url: repoUrl,
+        }
+      );
+
+      setReview(response.data);
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        error.response?.data?.detail ||
+        "Failed to review repository"
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+  };
+
+
+  const handleReview = async () => {
+
+    try {
+
+      setLoading(true);
+
+      let response;
+
+      // ================= ZIP REVIEW =================
+
+      if (uploadType === "zip" && selectedZip) {
+
+        const formData = new FormData();
+
+        formData.append("file", selectedZip);
+
+        response = await axios.post(
+          `${BASE_URL}/upload-zip-review`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
       }
-      );
+
+      // ================= FILE/FOLDER REVIEW =================
+
+      else if (
+        (uploadType === "files" || uploadType === "folder") &&
+        selectedFiles.length > 0
+      ) {
+
+        const formData = new FormData();
+
+        selectedFiles.forEach((file) => {
+          formData.append("files", file);
+        });
+
+        response = await axios.post(
+          `${BASE_URL}/upload-review`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+      }
+
+      // ================= MANUAL CODE REVIEW =================
+
+      else {
+
+        response = await axios.post(
+          `${BASE_URL}/review`,
+          {
+            code,
+            language: "java",
+          }
+        );
+
+      }
+
       setReview(response.data);
 
-       
-     }catch(error){
-           console.log(error);
-         
-    alert(
-      error.response?.data?.detail ||
-      "Failed to review repository"
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        error.response?.data?.detail ||
+        "Something went wrong while reviewing."
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+  };
+
+
+  // =========================
+  // REMOVE FILE
+  // =========================
+
+  const removeFile = (index) => {
+
+    setSelectedFiles(
+      selectedFiles.filter((_, i) => i !== index)
     );
 
-  } finally {
+  };
 
-    setLoading(false);
 
-  }
-}
+  // =========================
+  // RENDER ISSUES
+  // =========================
 
-const handleReview = async () => {
-  try {
-    setLoading(true);
+  const renderIssues = (title, issues, color) => {
 
-    let response;
+    if (!issues || issues.length === 0) return null;
 
-    // ZIP REVIEW
-    if (uploadType === "zip" && selectedZip) {
+    return (
+      <div>
 
-      const formData = new FormData();
-      formData.append("file", selectedZip);
+        <h3 className="section-title">
+          {title}
+        </h3>
 
-      response = await axios.post(
-        "http://127.0.0.1:8001/upload-zip-review",
-        formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          issues.map((item, index) => (
+
+            <div
+              className={`issue ${color}`}
+              key={index}
+            >
+
+              <h4>{item.issue}</h4>
+
+              <p>{item.explanation}</p>
+
+              <p>
+                <strong>Fix:</strong> {item.fix}
+              </p>
+
+            </div>
+
+          ))
         }
-      );
 
-      setReview(response.data);
-    }
-
-    // FILES OR FOLDER REVIEW
-    else if (
-      (uploadType === "files" || uploadType === "folder")
-      && selectedFiles.length > 0
-    ) {
-
-      const formData = new FormData();
-
-      selectedFiles.forEach((file) => {
-        formData.append("files", file);
-      });
-
-      response = await axios.post(
-        "http://127.0.0.1:8001/upload-review",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      setReview(response.data);
-    }
-
-    // MANUAL CODE REVIEW
-    else {
-
-      response = await axios.post(
-        "http://127.0.0.1:8001/review",
-        {
-          code,
-          language: "java",
-        }
-      );
-
-      setReview(response.data);
-    }
-
-  } catch (error) {
-
-    console.error(error);
-
-    alert(
-      error.response?.data?.detail ||
-      "Something went wrong while reviewing."
+      </div>
     );
+  };
 
-  } finally {
 
-    setLoading(false);
-
-  }
-};
-  
+  // =========================
+  // JSX
+  // =========================
 
   return (
 
     <div className="app">
 
-      {/* Navbar */}
+      {/* ================= NAVBAR ================= */}
 
       <nav className="navbar">
 
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <h1 className="logo">CodeSensei</h1>
-          <span className="nav-badge">BETA</span>
+        <div className="logo-section">
+
+          <h1 className="logo">
+            CodeSensei
+          </h1>
+
+          <span className="nav-badge">
+            BETA
+          </span>
+
         </div>
 
         <div className="nav-links">
-          <span className="nav-link">Docs</span>
-          <span className="nav-link">Pricing</span>
+
+          <span className="nav-link">
+            Docs
+          </span>
+
+          <span className="nav-link">
+            Pricing
+          </span>
 
           <button className="nav-btn">
             Try Review
           </button>
+
         </div>
 
       </nav>
 
-      {/* Hero Section */}
+
+      {/* ================= HERO SECTION ================= */}
 
       <section className="hero">
 
-       {/* LEFT SIDE */}
+        {/* ================= LEFT SIDE ================= */}
 
-<div className="left">
+        <div className="left">
 
-  <p className="tag">
-    AI Powered Code Review
-  </p>
+          <p className="tag">
+            AI Powered Code Review
+          </p>
 
-  <h1>
-    Your AI Senior Developer.
-    <span> Available 24/7.</span>
-  </h1>
+          <h1>
+            Your AI Senior Developer.
+            <span> Available 24/7.</span>
+          </h1>
 
-  <div className="buttons">
 
-    <button
-      className="primary-btn"
-      onClick={() => setShowInput(true)}
-    >
-      Start Reviewing
-    </button>
+          {/* ================= BUTTONS ================= */}
 
-    <button className="secondary-btn" onClick={()=> setShowGithubInput(true)}>
-      Connect GitHub
-    </button>
-   {showGithubInput && (
-  <div className="github-review-card">
+          <div className="buttons">
 
-    <h3>Connect GitHub Repository</h3>
+            <button
+              className="primary-btn"
+              onClick={() => setShowInput(true)}
+            >
+              Start Reviewing
+            </button>
 
-    <input
-      className="github-input"
-      type="text"
-      placeholder="https://github.com/user/repository"
-      value={repoUrl}
-      onChange={(e) => setRepoUrl(e.target.value)}
-    />
+            <button
+              className="secondary-btn"
+              onClick={() =>
+                setShowGithubInput(!showGithubInput)
+              }
+            >
+              Connect GitHub
+            </button>
 
-    <button
-      className="github-review-btn"
-      onClick={handleGithubReview}
-    >
-      Analyze Repository
-    </button>
+          </div>
 
-  </div>
-)}
-<div className="pr-review-card">
 
-  <h3>🔀 Review Pull Request</h3>
+          {/* ================= GITHUB REVIEW ================= */}
 
-  <input
-    type="text"
-    placeholder="Paste GitHub PR URL..."
-    value={prUrl}
-    onChange={(e) => setPrUrl(e.target.value)}
-  />
+          {
+            showGithubInput && (
 
-  <button onClick={handlePrReview}>
-    Analyze PR
-  </button>
+              <div className="github-review-card">
 
-</div>
+                <h3>
+                  Connect GitHub Repository
+                </h3>
 
-  {
-    showInput && (
+                <input
+                  className="github-input"
+                  type="text"
+                  placeholder="https://github.com/user/repository"
+                  value={repoUrl}
+                  onChange={(e) =>
+                    setRepoUrl(e.target.value)
+                  }
+                />
 
-      <div className="review-box">
+                <button
+                  className="github-review-btn"
+                  onClick={handleGithubReview}
+                >
+                  Analyze Repository
+                </button>
 
-        <textarea
-          placeholder="Paste code or upload project ZIP..."
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-        />
+              </div>
+            )
+          }
 
-        <div className="review-actions">
 
-          {/* Upload Button */}
+          {/* ================= PR REVIEW ================= */}
 
-         <div className="upload-options">
+          <div className="pr-review-card">
 
-  {/* Files */}
- <label className="upload-btn">
-  Files
-  
+            <h3>
+              Review Pull Request
+            </h3>
+
+            <input
+              type="text"
+              placeholder="Paste GitHub PR URL..."
+              value={prUrl}
+              onChange={(e) =>
+                setPrUrl(e.target.value)
+              }
+            />
+
+            <button onClick={handlePrReview}>
+              Analyze PR
+            </button>
+
+          </div>
+
+
+          {/* ================= REVIEW BOX ================= */}
+
+          {
+            showInput && (
+
+              <div className="review-box">
+
+                <textarea
+                  placeholder="Paste your code here..."
+                  value={code}
+                  onChange={(e) =>
+                    setCode(e.target.value)
+                  }
+                />
+
+
+
+                {/* ================= UPLOAD OPTIONS ================= */}
+
+<div className="upload-options">
+
+  <label className="upload-btn">
+    Files
+
     <input
       type="file"
       hidden
       multiple
       accept=".js,.py,.java,.cpp,.txt"
-     onChange={(e) => {
-  setUploadType("files");
-  setSelectedZip(null);
+      onChange={(e) => {
+        setUploadType("files");
+        setSelectedZip(null);
 
-  setSelectedFiles(prev => [
-    ...prev,
-    ...Array.from(e.target.files)
-  ]);
-}}
-      
+        setSelectedFiles([
+          ...selectedFiles,
+          ...Array.from(e.target.files),
+        ]);
+      }}
     />
   </label>
 
-  {/* Folder */}
-
   <label className="upload-btn">
-  Folder
+    Folder
 
     <input
       type="file"
@@ -304,25 +430,25 @@ const handleReview = async () => {
         setUploadType("folder");
         setSelectedZip(null);
 
-        setSelectedFiles(prev => [
-  ...prev,
-  ...Array.from(e.target.files)
-]);
+        setSelectedFiles([
+          ...selectedFiles,
+          ...Array.from(e.target.files),
+        ]);
       }}
     />
   </label>
 
-  {/* ZIP */}
-
   <label className="upload-btn">
-     ZIP
+    ZIP
 
     <input
       type="file"
       hidden
       accept=".zip"
       onChange={(e) => {
+
         setUploadType("zip");
+
         setSelectedFiles([]);
 
         setSelectedZip(
@@ -332,76 +458,89 @@ const handleReview = async () => {
     />
   </label>
 
+  <button
+    className="submit-btn"
+    onClick={handleReview}
+  >
+    {
+      loading
+        ? "Reviewing..."
+        : "Review Code"
+    }
+  </button>
+
 </div>
 
-          {/* File Preview */}
 
-         <div className="files-container">
+                {/* ================= FILE PREVIEW ================= */}
 
-  {
-    selectedFiles.map((file, index) => (
+                <div className="files-container">
 
-      <div className="file-preview" key={index}>
+                  {
+                    selectedFiles.map((file, index) => (
 
-        <span className="file-name">
-          {file.name}
-        </span>
+                      <div
+                        className="file-preview"
+                        key={index}
+                      >
 
-        <button
-          className="remove-file"
-          onClick={() =>
-            setSelectedFiles(
-              selectedFiles.filter((_, i) => i !== index)
+                        <span className="file-name">
+                          {file.name}
+                        </span>
+
+                        <button
+                          className="remove-file"
+                          onClick={() =>
+                            removeFile(index)
+                          }
+                        >
+                          ×
+                        </button>
+
+                      </div>
+
+                    ))
+                  }
+
+
+                  {
+                    selectedZip && (
+
+                      <div className="file-preview">
+
+                        <span className="file-name">
+                          📦 {selectedZip.name}
+                        </span>
+
+                        <button
+                          className="remove-file"
+                          onClick={() => {
+
+                            setSelectedZip(null);
+                            setUploadType("");
+
+                          }}
+                        >
+                          ×
+                        </button>
+
+                      </div>
+                    )
+                  }
+
+                </div>
+
+
+                {/* ================= SUBMIT (moved next to upload options) ================= */}
+
+              </div>
             )
           }
-        >
-          ×
-        </button>
-
-      </div>
-
-    ))
-  }
-  {selectedZip && (
-  <div className="file-preview">
-
-    <span className="file-name">
-      📦 {selectedZip.name}
-    </span>
-
-    <button
-      className="remove-file"
-      onClick={() => {
-        setSelectedZip(null);
-        setUploadType("");
-      }}
-    >
-      ×
-    </button>
-
-  </div>
-)}
-
-</div>
-
-          {/* Review Button */}
-
-          <button
-            className="submit-btn"
-            onClick={handleReview}
-          >
-            Review Code
-          </button>
 
         </div>
 
-      </div>
 
-    )
-  }
-
-</div>
-        {/* RIGHT SIDE */}
+        {/* ================= RIGHT SIDE ================= */}
 
         <div className="review-card">
 
@@ -413,87 +552,71 @@ const handleReview = async () => {
 
           </div>
 
+
           {
             loading && (
-              <p>Reviewing code...</p>
+              <p>
+                Reviewing code...
+              </p>
             )
           }
 
-    {
-  review?.files?.map((file, fileIndex) => (
 
-    <div key={fileIndex}>
+          {
+            review?.files?.map((file, index) => (
 
-      <h2>{file.filename}</h2>
+              <div
+                className="review-file"
+                key={index}
+              >
 
-      {file.review?.bugs?.map((bug, index) => (
+                <h2>
+                  {file.filename}
+                </h2>
 
-        <div className="issue red" key={index}>
-          <h3>{bug.issue}</h3>
+                {
+                  renderIssues(
+                    "🐞 Bugs",
+                    file.review?.bugs,
+                    "red"
+                  )
+                }
 
-          <p>{bug.explanation}</p>
+                {
+                  renderIssues(
+                    "🔒 Security",
+                    file.review?.security,
+                    "yellow"
+                  )
+                }
 
-          <p>
-            <strong>Fix:</strong> {bug.fix}
-          </p>
-        </div>
+                {
+                  renderIssues(
+                    "⚡ Performance",
+                    file.review?.performance,
+                    "green"
+                  )
+                }
 
-      ))}
+                {
+                  renderIssues(
+                    "🧹 Code Quality",
+                    file.review?.code_quality,
+                    "blue"
+                  )
+                }
 
-      {file.review?.security?.map((item, index) => (
+              </div>
 
-        <div className="issue yellow" key={index}>
-          <h3>{item.issue}</h3>
-
-          <p>{item.explanation}</p>
-
-          <p>
-            <strong>Fix:</strong> {item.fix}
-          </p>
-        </div>
-
-      ))}
-
-      {file.review?.performance?.map((item, index) => (
-
-        <div className="issue green" key={index}>
-          <h3>{item.issue}</h3>
-
-          <p>{item.explanation}</p>
-
-          <p>
-            <strong>Fix:</strong> {item.fix}
-          </p>
-        </div>
-
-      ))}
-
-      {file.review?.code_quality?.map((item, index) => (
-
-        <div className="issue blue" key={index}>
-          <h3>{item.issue}</h3>
-
-          <p>{item.explanation}</p>
-
-          <p>
-            <strong>Fix:</strong> {item.fix}
-          </p>
-        </div>
-
-      ))}
-
-    </div>
-
-  ))
-}
+            ))
+          }
 
         </div>
 
       </section>
 
     </div>
-
-  )
+  );
 }
 
-export default App
+export default App;

@@ -11,6 +11,41 @@ function App() {
 const [selectedFiles, setSelectedFiles] = useState([])
 const [selectedZip, setSelectedZip] = useState(null)
 const [uploadType, setUploadType] = useState("")
+const[repoUrl,setRepoUrl]=useState("")
+const[showGithubInput,setShowGithubInput]=useState(false)
+
+const handleGithubReview=async()=>{
+     try{
+      setLoading(true);
+      console.log({
+  repo_url: repoUrl
+});
+
+
+      const response=await axios.post(
+       "http://127.0.0.1:8001/repository-review",
+      {
+        repo_url:repoUrl
+      }
+      );
+      setReview(response.data);
+
+       
+     }catch(error){
+           console.log(error);
+         
+    alert(
+      error.response?.data?.detail ||
+      "Failed to review repository"
+    );
+
+  } finally {
+
+    setLoading(false);
+
+  }
+}
+
 const handleReview = async () => {
   try {
     setLoading(true);
@@ -142,9 +177,31 @@ const handleReview = async () => {
       Start Reviewing
     </button>
 
-    <button className="secondary-btn">
+    <button className="secondary-btn" onClick={()=> setShowGithubInput(true)}>
       Connect GitHub
     </button>
+   {showGithubInput && (
+  <div className="github-review-card">
+
+    <h3>Connect GitHub Repository</h3>
+
+    <input
+      className="github-input"
+      type="text"
+      placeholder="https://github.com/user/repository"
+      value={repoUrl}
+      onChange={(e) => setRepoUrl(e.target.value)}
+    />
+
+    <button
+      className="github-review-btn"
+      onClick={handleGithubReview}
+    >
+      Analyze Repository
+    </button>
+
+  </div>
+)}
 
   </div>
 

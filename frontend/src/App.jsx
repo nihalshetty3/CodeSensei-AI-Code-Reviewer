@@ -13,6 +13,37 @@ const [selectedZip, setSelectedZip] = useState(null)
 const [uploadType, setUploadType] = useState("")
 const[repoUrl,setRepoUrl]=useState("")
 const[showGithubInput,setShowGithubInput]=useState(false)
+const[prUrl,setPrUrl]=useState("")
+
+
+const handlePrReview=async()=>{
+       try{
+            setLoading(true)
+             const response = await axios.post(
+      "http://127.0.0.1:8001/pr-review",
+      {
+        pr_url: prUrl
+      }
+    );
+    setReview(response.data);
+
+  } catch (error) {
+
+    console.error(error.response?.data);
+
+    alert(
+      error.response?.data?.detail ||
+      "Failed to review PR"
+    );
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+       
+}
 
 const handleGithubReview=async()=>{
      try{
@@ -202,8 +233,22 @@ const handleReview = async () => {
 
   </div>
 )}
+<div className="pr-review-card">
 
-  </div>
+  <h3>🔀 Review Pull Request</h3>
+
+  <input
+    type="text"
+    placeholder="Paste GitHub PR URL..."
+    value={prUrl}
+    onChange={(e) => setPrUrl(e.target.value)}
+  />
+
+  <button onClick={handlePrReview}>
+    Analyze PR
+  </button>
+
+</div>
 
   {
     showInput && (

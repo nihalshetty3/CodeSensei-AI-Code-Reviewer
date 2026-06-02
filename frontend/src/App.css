@@ -592,3 +592,72 @@ body {
   flex-direction:column;
   gap:15px;   
 }
+.github-review-card{
+  margin-top:25px;
+  width:100%;
+  max-width:600px;
+
+  padding:24px;
+
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:18px;
+
+  background:rgba(255,255,255,0.03);
+
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+
+  backdrop-filter:blur(10px);
+}
+
+.github-review-card h3{
+  color:white;
+  font-size:18px;
+  margin:0;
+}
+
+.github-input{
+  width:100%;
+
+  padding:14px 18px;
+
+  border:none;
+  outline:none;
+
+  border-radius:12px;
+
+  background:#111827;
+  color:white;
+
+  font-size:15px;
+}
+
+.github-input:focus{
+  border:1px solid #8b5cf6;
+}
+
+.github-review-btn{
+  width:fit-content;
+
+  padding:12px 22px;
+
+  border:none;
+  border-radius:12px;
+
+  background:linear-gradient(
+    135deg,
+    #8b5cf6,
+    #6366f1
+  );
+
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+
+  transition:0.3s;
+}
+
+.github-review-btn:hover{
+  transform:translateY(-2px);
+}

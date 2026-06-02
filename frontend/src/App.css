@@ -661,3 +661,92 @@ body {
 .github-review-btn:hover{
   transform:translateY(-2px);
 }
+
+
+.pr-review-card{
+  margin-top: 24px;
+
+  width: 100%;
+  max-width: 550px;
+
+  padding: 24px;
+
+  background: rgba(255,255,255,0.04);
+
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+
+  backdrop-filter: blur(10px);
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pr-review-card h3{
+  margin: 0;
+
+  color: white;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.pr-review-card input{
+  width: 100%;
+
+  padding: 14px 16px;
+
+  background: #111827;
+
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+
+  color: white;
+  font-size: 15px;
+
+  outline: none;
+
+  transition: all 0.3s ease;
+}
+
+.pr-review-card input::placeholder{
+  color: #94a3b8;
+}
+
+.pr-review-card input:focus{
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.15);
+}
+
+.pr-review-card button{
+  width: fit-content;
+
+  padding: 12px 24px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(
+    135deg,
+    #8b5cf6,
+    #6366f1
+  );
+
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+}
+
+.pr-review-card button:hover{
+  transform: translateY(-2px);
+
+  box-shadow: 0 10px 25px rgba(139,92,246,0.35);
+}
+
+.pr-review-card button:active{
+  transform: translateY(0);
+}

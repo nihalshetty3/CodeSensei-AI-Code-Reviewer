@@ -332,29 +332,30 @@ body {
 
   opacity: 0.9;
 }
-
 .submit-btn {
-  width: 180px;
 
-  height: 60px;
-
-  border: none;
-
-  border-radius: 14px;
-
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #7b61ff, #9b6dff);
 
   color: white;
 
-  cursor: pointer;
+  border: none;
+
+  width: 220px;   /* longer */
+  height: 56px;
+
+  border-radius: 14px;
 
   font-size: 15px;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  cursor: pointer;
 
-  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-  transition: 0.2s;
+  transition: 0.3s ease;
 }
-
 .submit-btn:hover {
   transform: translateY(-2px);
 
@@ -425,7 +426,7 @@ body {
 .review-card {
   width: 100%;
 
-  min-height: 700px;
+  min-height: 900px;
 
   background: linear-gradient(145deg, #0f172a, #0d1526);
 
@@ -595,7 +596,7 @@ body {
 .github-review-card{
   margin-top:25px;
   width:100%;
-  max-width:600px;
+  max-width:800px;
 
   padding:24px;
 
@@ -660,4 +661,128 @@ body {
 
 .github-review-btn:hover{
   transform:translateY(-2px);
+}
+
+
+.pr-review-card{
+  margin-top: 24px;
+
+  width: 100%;
+  max-width: 700px;
+
+  padding: 22px;
+
+  background: rgba(255,255,255,0.04);
+
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+
+  backdrop-filter: blur(10px);
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pr-review-card h3{
+  margin: 0;
+
+  color: white;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.pr-review-card input{
+  width: 100%;
+
+  padding: 14px 16px;
+
+  background: #111827;
+
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+
+  color: white;
+  font-size: 15px;
+
+  outline: none;
+
+  transition: all 0.3s ease;
+}
+
+.pr-review-card input::placeholder{
+  color: #94a3b8;
+}
+
+.pr-review-card input:focus{
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.15);
+}
+
+.pr-review-card button{
+  width: fit-content;
+
+  padding: 12px 24px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(
+    135deg,
+    #8b5cf6,
+    #6366f1
+  );
+
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+}
+
+.pr-review-card button:hover{
+  transform: translateY(-2px);
+
+  box-shadow: 0 10px 25px rgba(139,92,246,0.35);
+}
+
+.pr-review-card button:active{
+  transform: translateY(0);
+}
+.upload-options {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 18px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.upload-btn {
+  background: linear-gradient(135deg, #7b61ff, #9b6dff);
+  color: white;
+
+  padding: 14px 14px;
+
+  border-radius: 14px;
+  cursor: pointer;
+
+  font-size: 15px;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+
+  letter-spacing: 0.5px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  min-width: 130px;
+
+  transition: 0.3s ease;
+}
+.upload-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
 }

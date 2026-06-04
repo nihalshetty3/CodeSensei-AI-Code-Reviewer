@@ -181,6 +181,7 @@ Leverage Model Context Protocol (MCP) servers to connect with:
 * Knowledge bases
 
 This will enable deeper repository understanding and agentic code review workflows.
+<img width="213" height="495" alt="image" src="https://github.com/user-attachments/assets/3878a8f7-d058-48cd-99e0-d23e2c166015" />
 
 
 

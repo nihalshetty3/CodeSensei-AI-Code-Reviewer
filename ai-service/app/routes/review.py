@@ -23,6 +23,8 @@ from app.services.documentation_agent import (
     explain_finding
 )
 
+from app.agents.orchestrator import orchestrate_review
+
 import tempfile
 import os
 
@@ -33,7 +35,7 @@ router = APIRouter()
 @router.post("/review")
 async def review_code(data: ReviewRequest):
 
-    review = generate_review(
+    review = orchestrate_review(
         data.code,
         data.language
     )

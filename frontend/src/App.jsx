@@ -13,6 +13,26 @@ const isLocalhost = () => {
   return host === "localhost" || host === "127.0.0.1";
 };
 
+/** API wraps single-snippet results as { success, review: { bugs, ... } } */
+const normalizeReviewResponse = (data) => {
+  if (!data || typeof data !== "object") return data;
+  if (Array.isArray(data.files)) return data;
+  if (data.review && typeof data.review === "object") return data.review;
+  return data;
+};
+
+const hasFormattedIssues = (data) =>
+  data &&
+  (data.bugs ||
+    data.bug ||
+    data.errors ||
+    data.security ||
+    data.vulnerabilities ||
+    data.performance ||
+    data.optimization ||
+    data.code_quality ||
+    data.suggestions);
+
 function App() {
 
   // =========================
@@ -139,13 +159,16 @@ function App() {
         `${BASE_URL}/pr-review`,
         { pr_url: prUrl }
       );
-      setReview(response.data);
+      setReview(normalizeReviewResponse(response.data));
     } catch (error) {
       console.error(error);
-      alert(
-        error.response?.data?.detail ||
-        "Failed to review PR"
-      );
+      if (!error.response || error.message === "Network Error") {
+        alert(
+          "Backend server connection refused. Please ensure your backend is running on http://127.0.0.1:8000"
+        );
+      } else {
+        alert(error.response?.data?.detail || "Something went wrong.");
+      }
     } finally {
       setLoading(false);
     }
@@ -172,13 +195,16 @@ function App() {
         }
       );
 
-      setReview(response.data);
+      setReview(normalizeReviewResponse(response.data));
     } catch (error) {
       console.error(error);
-      alert(
-        error.response?.data?.detail ||
-        "Failed to review repository"
-      );
+      if (!error.response || error.message === "Network Error") {
+        alert(
+          "Backend server connection refused. Please ensure your backend is running on http://127.0.0.1:8000"
+        );
+      } else {
+        alert(error.response?.data?.detail || "Something went wrong.");
+      }
     } finally {
       setLoading(false);
     }
@@ -236,13 +262,16 @@ function App() {
         );
       }
 
-      setReview(response.data);
+      setReview(normalizeReviewResponse(response.data));
     } catch (error) {
       console.error(error);
-      alert(
-        error.response?.data?.detail ||
-        "Something went wrong while reviewing."
-      );
+      if (!error.response || error.message === "Network Error") {
+        alert(
+          "Backend server connection refused. Please ensure your backend is running on http://127.0.0.1:8000"
+        );
+      } else {
+        alert(error.response?.data?.detail || "Something went wrong.");
+      }
     } finally {
       setLoading(false);
     }
@@ -654,9 +683,12 @@ function App() {
               </div>
             ))}
 
-          {review && !review.files && typeof review === "object" && (review.bugs || review.security || review.performance || review.code_quality) && (
+          {review &&
+            !review.files &&
+            typeof review === "object" &&
+            hasFormattedIssues(review) && (
             <div className="review-file">
-              <h2>Manual Snippet Analysis</h2>
+              <h2>Pasted Code Analysis</h2>
               {renderIssues("🐞 Bugs", review.bugs || review.bug || review.errors, "red")}
               {renderIssues("🔒 Security", review.security || review.vulnerabilities, "yellow")}
               {renderIssues("⚡ Performance", review.performance || review.optimization, "green")}
@@ -664,7 +696,9 @@ function App() {
             </div>
           )}
 
-          {review && (typeof review === "string" || (!review.files && !review.bugs && !review.security)) && (
+          {review &&
+            (typeof review === "string" ||
+              (!review.files && !hasFormattedIssues(review))) && (
             <div className="review-file raw-text-review">
               <h2>Analysis Report</h2>
               <div style={{ whiteSpace: "pre-wrap", textAlign: "left", lineHeight: "1.6", color: "#e0e0e0" }}>

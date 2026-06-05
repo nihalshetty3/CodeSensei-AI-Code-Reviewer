@@ -1,15 +1,18 @@
 function Navbar() {
   return (
-    <nav className="flex justify-between items-center px-8 py-5 border-b border-slate-700">
-      <h1 className="text-2xl font-bold text-indigo-400">
-        CodeSensei
-      </h1>
+    <nav className="navbar">
+      <div className="logo-section">
+        <h1 className="logo">CodeSensei</h1>
+        <span className="nav-badge">BETA</span>
+      </div>
 
-      <button className="bg-indigo-500 px-4 py-2 rounded-lg hover:bg-indigo-600 transition">
-        Try Review
-      </button>
+      <div className="nav-links">
+        <span className="nav-link">Docs</span>
+        <span className="nav-link">Pricing</span>
+        <button className="nav-btn">Try Review</button>
+      </div>
     </nav>
-  )
+  );
 }
 
-export default Navbar
+export default Navbar;

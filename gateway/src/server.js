@@ -3,6 +3,7 @@ require("dotenv").config();
 const passport = require("passport");
 const GitHubStrategy =
 require("passport-github2").Strategy;
+const pool = require("./config/db");
 
 const session = require("express-session");
 
@@ -13,7 +14,8 @@ const reviewRoutes = require("./routes/review.routes");
 const githubAuthRoutes = require("./routes/githubAuth.routes");
 const githubRepoRoutes = 
 require("./routes/githubRepo.routes");
-
+const historyRoutes =
+require("./routes/history.routes");
 passport.use(
   new GitHubStrategy(
     {
@@ -80,6 +82,8 @@ app.use(
 app.get("/", (req, res) => {
   res.send("CodeSensei Gateway Running");
 });
+
+app.use("/api/history", historyRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

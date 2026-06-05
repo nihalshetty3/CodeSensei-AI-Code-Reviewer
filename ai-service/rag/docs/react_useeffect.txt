@@ -1,0 +1,9 @@
+React useEffect runs after render.
+
+Dependency array controls when the effect executes.
+
+Empty dependency array [] means
+the effect runs only once after mount.
+
+Missing dependency arrays can cause
+unnecessary re-renders.

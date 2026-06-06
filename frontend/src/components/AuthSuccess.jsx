@@ -1,28 +1,25 @@
 import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-function AuthSuccess() {
+export default function AuthSuccess() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // 1. Grab the token query parameter from the URL string
     const token = params.get("token");
 
     if (token) {
-      // 2. Save it securely inside the browser storage
       localStorage.setItem("token", token);
-      
-      // 3. Bounce the user right back to your main dashboard page
-      window.location.href = "/";
+      navigate("/dashboard", { replace: true });
     }
-  }, [params]);
+  }, [params, navigate]);
 
   return (
-    <div style={{ color: "#fff", textAlign: "center", marginTop: "100px", fontFamily: "sans-serif" }}>
-      <h2>Authenticating with CodeSensei...</h2>
-      <p style={{ color: "#666" }}>Please wait while we sync your GitHub session.</p>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#0B0C10] text-center">
+      <h2 className="text-xl font-semibold text-white">Authenticating with CodeSensei...</h2>
+      <p className="mt-2 text-sm text-slate-500">
+        Please wait while we sync your GitHub session.
+      </p>
     </div>
   );
 }
-
-export default AuthSuccess;

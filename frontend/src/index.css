@@ -1,3 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  --color-space: #0b0c10;
+  --color-space-elevated: #0f1016;
+  --color-space-border: #1e293b;
+  --color-accent: #6366f1;
+  --color-accent-glow: rgba(99, 102, 241, 0.45);
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  background-color: var(--color-space);
+  color: #e2e8f0;
+  -webkit-font-smoothing: antialiased;
+}

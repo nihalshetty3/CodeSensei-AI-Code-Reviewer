@@ -1,397 +1,297 @@
-import './App.css'
-import { useState } from 'react'
-import axios from 'axios'
+import "./App.css";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import Navbar from "./components/Navbar";
+import Workspace from "./pages/Workspace";
+import {
+  BASE_URL,
+  DEV_DUMMY_REPOS,
+  isLocalhost,
+  normalizeReviewResponse,
+} from "./utils/apiHelpers";
 
 function App() {
+  const [showInput, setShowInput] = useState(false);
+  const [showGithubInput, setShowGithubInput] = useState(false);
 
-  const [showInput, setShowInput] = useState(false)
-  const [code, setCode] = useState("")
-  const [review, setReview] = useState(null)
-  const [loading, setLoading] = useState(false)
-const [selectedFiles, setSelectedFiles] = useState([])
-const [selectedZip, setSelectedZip] = useState(null)
-const [uploadType, setUploadType] = useState("")
-const handleReview = async () => {
-  try {
-    setLoading(true);
+  const [code, setCode] = useState("");
+  const [review, setReview] = useState(null);
 
-    let response;
+  const [loading, setLoading] = useState(false);
 
-    // ZIP REVIEW
-    if (uploadType === "zip" && selectedZip) {
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedZip, setSelectedZip] = useState(null);
 
-      const formData = new FormData();
-      formData.append("file", selectedZip);
+  const [uploadType, setUploadType] = useState("");
 
-      response = await axios.post(
-        "http://127.0.0.1:8001/upload-zip-review",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+  const [repoUrl, setRepoUrl] = useState("");
+  const [prUrl, setPrUrl] = useState("");
 
-      setReview(response.data);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const [repos, setRepos] = useState([]);
+  const [selectedRepo, setSelectedRepo] = useState("");
+  const [fetchingRepos, setFetchingRepos] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    !!localStorage.getItem("token")
+  );
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get("token");
+    const storedToken = localStorage.getItem("token");
+
+    const openAuthenticatedWorkspace = () => {
+      setShowGithubInput(true);
+      setRepos(DEV_DUMMY_REPOS);
+    };
+
+    if (urlToken) {
+      localStorage.setItem("token", urlToken);
+      setIsAuthenticated(true);
+      openAuthenticatedWorkspace();
+      window.history.replaceState({}, document.title, "/");
+    } else if (storedToken) {
+      setShowGithubInput(true);
+      setRepos(DEV_DUMMY_REPOS);
     }
+  }, []);
 
-    // FILES OR FOLDER REVIEW
-    else if (
-      (uploadType === "files" || uploadType === "folder")
-      && selectedFiles.length > 0
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const isMockSession = token === "mock_dev_token";
+
+    if (
+      showGithubInput &&
+      isAuthenticated &&
+      repos.length === 0 &&
+      !isMockSession
     ) {
+      const fetchRepositories = async () => {
+        if (!token) return;
 
-      const formData = new FormData();
+        try {
+          setFetchingRepos(true);
+          const response = await axios.get(`${BASE_URL}/github/repos`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          setRepos(response.data);
+        } catch (error) {
+          console.error("Failed to fetch repositories:", error);
+          if (error.response?.status === 401) {
+            localStorage.removeItem("token");
+            setIsAuthenticated(false);
+            setShowGithubInput(false);
+          }
+        } finally {
+          setFetchingRepos(false);
+        }
+      };
 
-      selectedFiles.forEach((file) => {
-        formData.append("files", file);
-      });
+      fetchRepositories();
+    }
+  }, [showGithubInput, isAuthenticated, repos.length]);
 
-      response = await axios.post(
-        "http://127.0.0.1:8001/upload-review",
-        formData,
+  const handleConnectGitHub = () => {
+    if (isLocalhost()) {
+      localStorage.setItem("token", "mock_dev_token");
+      setIsAuthenticated(true);
+      setShowGithubInput(true);
+      setRepos(DEV_DUMMY_REPOS);
+      return;
+    }
+
+    window.location.href = "http://localhost:8000/api/auth/github";
+  };
+
+  const handlePrReview = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        `${BASE_URL}/pr-review`,
+        { pr_url: prUrl }
+      );
+      setReview(normalizeReviewResponse(response.data));
+    } catch (error) {
+      console.error(error);
+      if (!error.response || error.message === "Network Error") {
+        alert(
+          "Backend server connection refused. Please ensure your backend is running on http://127.0.0.1:8000"
+        );
+      } else {
+        alert(error.response?.data?.detail || "Something went wrong.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGithubReview = async () => {
+    if (!selectedRepo) {
+      alert("Please select a repository first.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+
+      const response = await axios.post(
+        `${BASE_URL}/repository-review`,
+        { repo_url: selectedRepo },
         {
           headers: {
-            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      setReview(response.data);
+      setReview(normalizeReviewResponse(response.data));
+    } catch (error) {
+      console.error(error);
+      if (!error.response || error.message === "Network Error") {
+        alert(
+          "Backend server connection refused. Please ensure your backend is running on http://127.0.0.1:8000"
+        );
+      } else {
+        alert(error.response?.data?.detail || "Something went wrong.");
+      }
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // MANUAL CODE REVIEW
-    else {
+  const handleReview = async () => {
+    try {
+      setLoading(true);
+      let response;
 
-      response = await axios.post(
-        "http://127.0.0.1:8001/review",
-        {
-          code,
-          language: "java",
-        }
-      );
+      if (uploadType === "zip" && selectedZip) {
+        const formData = new FormData();
+        formData.append("file", selectedZip);
 
-      setReview(response.data);
+        response = await axios.post(
+          `${BASE_URL}/upload-zip-review`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      } else if (
+        (uploadType === "files" || uploadType === "folder") &&
+        selectedFiles.length > 0
+      ) {
+        const formData = new FormData();
+        selectedFiles.forEach((file) => {
+          formData.append("files", file);
+        });
+
+        response = await axios.post(
+          `${BASE_URL}/upload-review`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      } else {
+        response = await axios.post(
+          `${BASE_URL}/review`,
+          {
+            code,
+            language: "java",
+          }
+        );
+      }
+
+      setReview(normalizeReviewResponse(response.data));
+    } catch (error) {
+      console.error(error);
+      if (!error.response || error.message === "Network Error") {
+        alert(
+          "Backend server connection refused. Please ensure your backend is running on http://127.0.0.1:8000"
+        );
+      } else {
+        alert(error.response?.data?.detail || "Something went wrong.");
+      }
+    } finally {
+      setLoading(false);
     }
+  };
 
-  } catch (error) {
+  const removeFile = (index) => {
+    setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
+  };
 
-    console.error(error);
+  const toggleDropdown = () => {
+    if (fetchingRepos) return;
+    setDropdownOpen((prev) => !prev);
+  };
 
-    alert(
-      error.response?.data?.detail ||
-      "Something went wrong while reviewing."
-    );
+  const getRepoTriggerLabel = () => {
+    if (fetchingRepos) {
+      return "Fetching repositories from GitHub...";
+    }
+    if (!selectedRepo) {
+      return "Select a repository...";
+    }
+    const match = repos.find((r) => r.full_name === selectedRepo);
+    const name = match?.name ?? selectedRepo.split("/").pop();
+    const fullName = match?.full_name ?? selectedRepo;
+    return `📦 ${name} (${fullName})`;
+  };
 
-  } finally {
-
-    setLoading(false);
-
-  }
-};
-  
+  const handleDisconnectAccount = () => {
+    localStorage.removeItem("token");
+    setIsAuthenticated(false);
+    setShowGithubInput(false);
+    setRepos([]);
+    setSelectedRepo("");
+    setDropdownOpen(false);
+  };
 
   return (
-
     <div className="app">
-
-      {/* Navbar */}
-
-      <nav className="navbar">
-
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <h1 className="logo">CodeSensei</h1>
-          <span className="nav-badge">BETA</span>
-        </div>
-
-        <div className="nav-links">
-          <span className="nav-link">Docs</span>
-          <span className="nav-link">Pricing</span>
-
-          <button className="nav-btn">
-            Try Review
-          </button>
-        </div>
-
-      </nav>
-
-      {/* Hero Section */}
-
-      <section className="hero">
-
-       {/* LEFT SIDE */}
-
-<div className="left">
-
-  <p className="tag">
-    AI Powered Code Review
-  </p>
-
-  <h1>
-    Your AI Senior Developer.
-    <span> Available 24/7.</span>
-  </h1>
-
-  <div className="buttons">
-
-    <button
-      className="primary-btn"
-      onClick={() => setShowInput(true)}
-    >
-      Start Reviewing
-    </button>
-
-    <button className="secondary-btn">
-      Connect GitHub
-    </button>
-
-  </div>
-
-  {
-    showInput && (
-
-      <div className="review-box">
-
-        <textarea
-          placeholder="Paste code or upload project ZIP..."
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-        />
-
-        <div className="review-actions">
-
-          {/* Upload Button */}
-
-         <div className="upload-options">
-
-  {/* Files */}
- <label className="upload-btn">
-  Files
-  
-    <input
-      type="file"
-      hidden
-      multiple
-      accept=".js,.py,.java,.cpp,.txt"
-     onChange={(e) => {
-  setUploadType("files");
-  setSelectedZip(null);
-
-  setSelectedFiles(prev => [
-    ...prev,
-    ...Array.from(e.target.files)
-  ]);
-}}
-      
-    />
-  </label>
-
-  {/* Folder */}
-
-  <label className="upload-btn">
-  Folder
-
-    <input
-      type="file"
-      hidden
-      multiple
-      webkitdirectory=""
-      directory=""
-      onChange={(e) => {
-        setUploadType("folder");
-        setSelectedZip(null);
-
-        setSelectedFiles(prev => [
-  ...prev,
-  ...Array.from(e.target.files)
-]);
-      }}
-    />
-  </label>
-
-  {/* ZIP */}
-
-  <label className="upload-btn">
-     ZIP
-
-    <input
-      type="file"
-      hidden
-      accept=".zip"
-      onChange={(e) => {
-        setUploadType("zip");
-        setSelectedFiles([]);
-
-        setSelectedZip(
-          e.target.files[0]
-        );
-      }}
-    />
-  </label>
-
-</div>
-
-          {/* File Preview */}
-
-         <div className="files-container">
-
-  {
-    selectedFiles.map((file, index) => (
-
-      <div className="file-preview" key={index}>
-
-        <span className="file-name">
-          {file.name}
-        </span>
-
-        <button
-          className="remove-file"
-          onClick={() =>
-            setSelectedFiles(
-              selectedFiles.filter((_, i) => i !== index)
-            )
-          }
-        >
-          ×
-        </button>
-
-      </div>
-
-    ))
-  }
-  {selectedZip && (
-  <div className="file-preview">
-
-    <span className="file-name">
-      📦 {selectedZip.name}
-    </span>
-
-    <button
-      className="remove-file"
-      onClick={() => {
-        setSelectedZip(null);
-        setUploadType("");
-      }}
-    >
-      ×
-    </button>
-
-  </div>
-)}
-
-</div>
-
-          {/* Review Button */}
-
-          <button
-            className="submit-btn"
-            onClick={handleReview}
-          >
-            Review Code
-          </button>
-
-        </div>
-
-      </div>
-
-    )
-  }
-
-</div>
-        {/* RIGHT SIDE */}
-
-        <div className="review-card">
-
-          <div className="card-header">
-
-            <span className="card-title">
-              Live Review
-            </span>
-
-          </div>
-
-          {
-            loading && (
-              <p>Reviewing code...</p>
-            )
-          }
-
-    {
-  review?.files?.map((file, fileIndex) => (
-
-    <div key={fileIndex}>
-
-      <h2>{file.filename}</h2>
-
-      {file.review?.bugs?.map((bug, index) => (
-
-        <div className="issue red" key={index}>
-          <h3>{bug.issue}</h3>
-
-          <p>{bug.explanation}</p>
-
-          <p>
-            <strong>Fix:</strong> {bug.fix}
-          </p>
-        </div>
-
-      ))}
-
-      {file.review?.security?.map((item, index) => (
-
-        <div className="issue yellow" key={index}>
-          <h3>{item.issue}</h3>
-
-          <p>{item.explanation}</p>
-
-          <p>
-            <strong>Fix:</strong> {item.fix}
-          </p>
-        </div>
-
-      ))}
-
-      {file.review?.performance?.map((item, index) => (
-
-        <div className="issue green" key={index}>
-          <h3>{item.issue}</h3>
-
-          <p>{item.explanation}</p>
-
-          <p>
-            <strong>Fix:</strong> {item.fix}
-          </p>
-        </div>
-
-      ))}
-
-      {file.review?.code_quality?.map((item, index) => (
-
-        <div className="issue blue" key={index}>
-          <h3>{item.issue}</h3>
-
-          <p>{item.explanation}</p>
-
-          <p>
-            <strong>Fix:</strong> {item.fix}
-          </p>
-        </div>
-
-      ))}
-
+      <Navbar />
+      <Workspace
+        showInput={showInput}
+        setShowInput={setShowInput}
+        showGithubInput={showGithubInput}
+        code={code}
+        setCode={setCode}
+        selectedFiles={selectedFiles}
+        selectedZip={selectedZip}
+        uploadType={uploadType}
+        setUploadType={setUploadType}
+        setSelectedFiles={setSelectedFiles}
+        setSelectedZip={setSelectedZip}
+        prUrl={prUrl}
+        setPrUrl={setPrUrl}
+        dropdownOpen={dropdownOpen}
+        setDropdownOpen={setDropdownOpen}
+        repos={repos}
+        selectedRepo={selectedRepo}
+        setSelectedRepo={setSelectedRepo}
+        fetchingRepos={fetchingRepos}
+        isAuthenticated={isAuthenticated}
+        loading={loading}
+        handleDisconnectAccount={handleDisconnectAccount}
+        review={review}
+        handleConnectGitHub={handleConnectGitHub}
+        handlePrReview={handlePrReview}
+        handleGithubReview={handleGithubReview}
+        handleReview={handleReview}
+        removeFile={removeFile}
+        toggleDropdown={toggleDropdown}
+        getRepoTriggerLabel={getRepoTriggerLabel}
+      />
     </div>
-
-  ))
+  );
 }
 
-        </div>
-
-      </section>
-
-    </div>
-
-  )
-}
-
-export default App
+export default App;

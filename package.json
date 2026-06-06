@@ -4,7 +4,9 @@
   "description": "CodeSensei is an agentic AI-powered code review platform designed to act like an experienced software engineer reviewing your code. Instead of waiting for a teammate or manually debugging issues, developers can receive instant feedback on bugs, security concerns, performance problems, and code quality issues.",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"cd ai-service && uvicorn app.main:app --reload --port 8001\" \"cd gateway && npm run dev\" \"cd frontend && npm run dev\""
+    "predev": "node scripts/free-dev-ports.js && cd gateway && npm install && cd ../frontend && npm install",
+    "stop": "node scripts/free-dev-ports.js",
+   "dev": "concurrently -k \"cd ai-service && .venv/bin/python -m uvicorn app.main:app --reload --port 8001\" \"cd gateway && npm run dev\" \"cd frontend && npm run dev\""
   },
   "repository": {
     "type": "git",

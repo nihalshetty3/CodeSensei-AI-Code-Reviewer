@@ -1,0 +1,8 @@
+FastAPI path operations use decorators.
+
+Examples:
+@app.get
+@app.post
+@app.put
+
+Functions automatically become API endpoints.

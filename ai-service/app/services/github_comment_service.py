@@ -1,8 +1,4 @@
-import os 
-print(
-    "TOKEN:",
-    os.getenv("GITHUB_TOKEN")
-)
+import os
 from github import Github
 
 github_client = Github(

@@ -255,6 +255,23 @@ body {
   transform: translateY(-2px);
 }
 
+.github-status-badge {
+  background: #151922;
+  border: 1px solid #232936;
+  color: #4ade80;
+  cursor: default;
+  pointer-events: none;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.github-status-badge:hover {
+  background: #151922;
+  color: #4ade80;
+  transform: none;
+}
+
 /* ───────── Review Box ───────── */
 
 .review-box {
@@ -332,29 +349,30 @@ body {
 
   opacity: 0.9;
 }
-
 .submit-btn {
-  width: 180px;
 
-  height: 60px;
-
-  border: none;
-
-  border-radius: 14px;
-
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #7b61ff, #9b6dff);
 
   color: white;
 
-  cursor: pointer;
+  border: none;
+
+  width: 220px;   /* longer */
+  height: 56px;
+
+  border-radius: 14px;
 
   font-size: 15px;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  cursor: pointer;
 
-  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-  transition: 0.2s;
+  transition: 0.3s ease;
 }
-
 .submit-btn:hover {
   transform: translateY(-2px);
 
@@ -425,7 +443,7 @@ body {
 .review-card {
   width: 100%;
 
-  min-height: 700px;
+  min-height: 900px;
 
   background: linear-gradient(145deg, #0f172a, #0d1526);
 
@@ -591,4 +609,265 @@ body {
   display:flex;
   flex-direction:column;
   gap:15px;   
+}
+.github-review-card{
+  margin-top:25px;
+  width:100%;
+  max-width:800px;
+
+  padding:24px;
+
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:18px;
+
+  background:rgba(255,255,255,0.03);
+
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+
+  backdrop-filter:blur(10px);
+}
+
+.github-review-card h3{
+  color:white;
+  font-size:18px;
+  margin:0;
+}
+
+.github-input{
+  width:100%;
+
+  padding:14px 18px;
+
+  border:none;
+  outline:none;
+
+  border-radius:12px;
+
+  background:#111827;
+  color:white;
+
+  font-size:15px;
+}
+
+.github-input:focus{
+  border:1px solid #8b5cf6;
+}
+
+.github-review-btn{
+  width:fit-content;
+
+  padding:12px 22px;
+
+  border:none;
+  border-radius:12px;
+
+  background:linear-gradient(
+    135deg,
+    #8b5cf6,
+    #6366f1
+  );
+
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+
+  transition:0.3s;
+}
+
+.github-review-btn:hover{
+  transform:translateY(-2px);
+}
+
+
+.pr-review-card{
+  margin-top: 24px;
+
+  width: 100%;
+  max-width: 700px;
+
+  padding: 22px;
+
+  background: rgba(255,255,255,0.04);
+
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+
+  backdrop-filter: blur(10px);
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pr-review-card h3{
+  margin: 0;
+
+  color: white;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.pr-review-card input{
+  width: 100%;
+
+  padding: 14px 16px;
+
+  background: #111827;
+
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+
+  color: white;
+  font-size: 15px;
+
+  outline: none;
+
+  transition: all 0.3s ease;
+}
+
+.pr-review-card input::placeholder{
+  color: #94a3b8;
+}
+
+.pr-review-card input:focus{
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.15);
+}
+
+.pr-review-card button{
+  width: fit-content;
+
+  padding: 12px 24px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(
+    135deg,
+    #8b5cf6,
+    #6366f1
+  );
+
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+}
+
+.pr-review-card button:hover{
+  transform: translateY(-2px);
+
+  box-shadow: 0 10px 25px rgba(139,92,246,0.35);
+}
+
+.pr-review-card button:active{
+  transform: translateY(0);
+}
+.upload-options {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 18px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.upload-btn {
+  background: linear-gradient(135deg, #7b61ff, #9b6dff);
+  color: white;
+
+  padding: 14px 14px;
+
+  border-radius: 14px;
+  cursor: pointer;
+
+  font-size: 15px;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+
+  letter-spacing: 0.5px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  min-width: 130px;
+
+  transition: 0.3s ease;
+}
+.upload-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+/* ==========================================
+   GITHUB REPOSITORY SELECTION PANEL STYLES
+   ========================================== */
+
+.github-review-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.github-review-card h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  color: #f0f6fc;
+}
+
+/* Scrollable container for repository selection list */
+.repo-list {
+  max-height: 220px;
+  overflow-y: auto;
+  margin: 15px 0;
+  background: #0d1117;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #21262d;
+}
+
+/* Individual list item wrapping the radio button option */
+.repo-list label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  color: #c9d1d9;
+  cursor: pointer;
+  border-bottom: 1px solid #21262d;
+  transition: background 0.2s ease;
+}
+
+.repo-list label:last-child {
+  border-bottom: none;
+}
+
+.repo-list label:hover {
+  background: #1f242c;
+  color: #fff;
+}
+
+/* Custom styling to keep scrollbars looking unified and dark */
+.repo-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.repo-list::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+
+.repo-list::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
+}
+
+.repo-list::-webkit-scrollbar-thumb:hover {
+  background: #8b949e;
 }

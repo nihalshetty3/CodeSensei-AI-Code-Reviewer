@@ -6,7 +6,7 @@
   "scripts": {
     "predev": "node scripts/free-dev-ports.js && cd gateway && npm install && cd ../frontend && npm install",
     "stop": "node scripts/free-dev-ports.js",
-    "dev": "concurrently -k \"cd ai-service && python3 -m uvicorn app.main:app --reload --port 8001\" \"cd gateway && npm run dev\" \"cd frontend && npm run dev\""
+   "dev": "concurrently -k \"cd ai-service && .venv/bin/python -m uvicorn app.main:app --reload --port 8001\" \"cd gateway && npm run dev\" \"cd frontend && npm run dev\""
   },
   "repository": {
     "type": "git",

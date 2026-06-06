@@ -23,12 +23,28 @@ def get_rag_content(
         
         #if local match -> good
         if distance <= SIMILARITY_THRESHOLD:
+            
+            context = "\n\n".join(
+                [
+                    doc["content"]
+                    for doc in docs
+                ]
+            )
+            
+            sources = list(
+                set(
+                    [
+                        doc["source"]
+                        for doc in docs
+                    ]
+                )
+            )
+            
             return {
                 "success": True,
                 "source": "local",
-                "context": "\n\n".join(
-                    docs
-                )
+                "documents": sources,
+                "context": context
             }
             
         #Fallback to Tavily Search
@@ -39,6 +55,7 @@ def get_rag_content(
         return {
             "success": True,
             "source": "web",
+            "documents": [],
             "context": web_content
         }
     except Exception as e:
@@ -46,6 +63,7 @@ def get_rag_content(
         return {
             "success": False,
             "source": None,
+            "documents": [],
             "context": "",
             "error": str(e)
         }

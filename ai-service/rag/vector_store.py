@@ -25,15 +25,24 @@ def retrieve_context(query):
     
     distances , indices = index.search(
         embedding,
-        1
+        3
     )
     
     results=[]
     
     for idx in indices[0]:
-        results.append(
-            documents[idx]
-        )
+        
+        chunk = documents[idx]
+    
+        results.append({
+            "source": chunk["source"],
+            "content": chunk["content"]
+        })
+        
+    print(
+        "FAISS Distance",
+        distances[0][0]
+    )
     
     return {
         "documents": results,
@@ -41,5 +50,4 @@ def retrieve_context(query):
             distances[0][0]
         )
     }
-    
     

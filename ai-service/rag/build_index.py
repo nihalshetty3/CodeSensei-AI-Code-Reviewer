@@ -2,6 +2,7 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import os
 import pickle
+import fitz
 
 #Embedding model
 model = SentenceTransformer(
@@ -9,37 +10,108 @@ model = SentenceTransformer(
 )
 
 docs=[]
-file_names=[]
 
 docs_path="rag/docs"
+CHUNK_SIZE= 1000
+
+def extract_pdf_text(pdf_path):
+    text=""
+    
+    pdf = fitz.open(pdf_path)
+    
+    for page in pdf:
+        text += page.get_text()
+        
+    pdf.close()
+    return text
+    
+    
+def chunk_text(
+    text,
+    chunk_size = CHUNK_SIZE
+):
+    
+    chunks=[]
+    
+    for i in range(
+        0,
+        len(text),
+        chunk_size
+    ):
+        
+        chunks.append(
+            text[i:i + chunk_size]
+        )
+    return chunks
+
 
 for file in os.listdir(docs_path):
+    file_path = os.path.join(
+        docs_path,
+        file
+    )
     
-    with open(
-        os.path.join(
-            docs_path,
-            file
-        ),
-        "r"
-    ) as f:
+    try:
         
-        docs.append(
-            f.read()
-        )
+        if file.endswith(".txt"):
+            
+            with open(
+                file_path,
+                "r",
+                encoding="utf-8"
+            ) as f:
+                
+                text = f.read()
+                
+                chunks= chunk_text(
+                    text
+                )
+                
+                for chunk in chunks:
+                    docs.append({
+                        "source":file,
+                        "content": chunk
+                    })
+                
+        elif file.endswith(".pdf"):
+            pdf_text = extract_pdf_text(
+                file_path
+            )
+            
+            chunks=chunk_text(
+                pdf_text
+            )
+            
+            for chunk in chunks:
+                
+                docs.append({
+                    "source": file,
+                    "content": chunk
+                })
+            
+    
+    except Exception as e:
         
-        file_names.append(
-            file
+        print(
+            f"Error processing {file}: {e}"
         )
-embeddings = model.encode(
-    docs
+print(
+    f"Loaded {len(docs)} chunks"
+)
+
+embedddings = model.encode(
+    [
+        doc["content"]
+        for doc in docs
+    ]
 )
 
 index = faiss.IndexFlatL2(
-    embeddings.shape[1]
+    embedddings.shape[1]
 )
 
 index.add(
-    embeddings
+    embedddings
 )
 
 faiss.write_index(
@@ -50,13 +122,11 @@ faiss.write_index(
 with open(
     "rag/documents.pkl",
     "wb"
-) as f:
+)as f:
     
     pickle.dump(
         docs,
         f
     )
     
-print(
-    "RAG Index Built"
-)
+print("RAG index built")

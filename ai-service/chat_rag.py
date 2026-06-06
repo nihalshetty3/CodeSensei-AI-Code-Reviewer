@@ -22,6 +22,16 @@ while True:
         )
         
         print("\nSource:" , rag_result["source"])
+        
+        if(rag_result["source"] == "local"):
+            print(
+                "Documents:"
+            )
+            
+            for doc in rag_result["documents"]:
+                print(
+                    f"-{doc}"
+                )
         print("\nAnswer:")
         print(answer)
         print("\n" + "="*50 + "\n")

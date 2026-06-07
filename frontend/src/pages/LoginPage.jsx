@@ -6,8 +6,7 @@ export default function LoginPage() {
   const { connectGitHub } = useAuth();
 
   const handleGitHubLogin = () => {
-    connectGitHub();
-    navigate("/dashboard");
+       window.location.href="http://localhost:8000/api/auth/github";
   };
 
   return (

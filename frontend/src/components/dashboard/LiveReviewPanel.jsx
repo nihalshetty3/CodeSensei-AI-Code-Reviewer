@@ -2,6 +2,8 @@ import IssueCard from "../IssueCard";
 import { hasFormattedIssues } from "../../utils/apiHelpers";
 
 export default function LiveReviewPanel({ review, loading }) {
+     console.log("LIVE REVIEW PANEL DATA:");
+  console.log(review);
   return (
     <aside className="flex h-full min-h-0 flex-col rounded-xl border border-slate-800 bg-[#0F1016] shadow-[inset_0_0_30px_rgba(0,0,0,0.35)]">
       <header className="flex items-center justify-between border-b border-slate-800 px-5 py-4">

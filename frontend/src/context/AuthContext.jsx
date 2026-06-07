@@ -20,15 +20,16 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get("token");
+if (urlToken) {
+  localStorage.setItem("token", urlToken);
+  setIsAuthenticated(true);
 
-    if (urlToken) {
-      localStorage.setItem("token", urlToken);
-      setIsAuthenticated(true);
-      seedDummyRepos();
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (localStorage.getItem("token")) {
-      seedDummyRepos();
-    }
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname
+  );
+}
   }, [seedDummyRepos]);
 
   useEffect(() => {

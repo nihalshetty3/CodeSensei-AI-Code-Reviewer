@@ -87,7 +87,7 @@ export default function GitHubRepoInput({
                   key={repo.full_name}
                   type="button"
                   onClick={() => {
-                    onSelectRepo(repo.full_name);
+                    onSelectRepo(repo.url);
                     onCloseDropdown();
                   }}
                   className={`flex w-full flex-col border-b border-slate-800 px-4 py-3 text-left transition hover:bg-slate-800/60 ${

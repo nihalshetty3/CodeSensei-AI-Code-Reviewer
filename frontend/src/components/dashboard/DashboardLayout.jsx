@@ -47,7 +47,7 @@ export default function DashboardLayout() {
   const getRepoTriggerLabel = () => {
     if (fetchingRepos) return "Fetching repositories from GitHub...";
     if (!selectedRepo) return "Select a repository...";
-    const match = repos.find((r) => r.full_name === selectedRepo);
+    const match = repos.find((r) => r.url === selectedRepo);
     const name = match?.name ?? selectedRepo.split("/").pop();
     const fullName = match?.full_name ?? selectedRepo;
     return `📦 ${name} (${fullName})`;

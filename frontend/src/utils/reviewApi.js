@@ -17,7 +17,7 @@ export async function fetchGithubRepos(token) {
   const response = await axios.get(`${BASE_URL}/github/repos`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data;
+  return response.data.repositories;
 }
 
 export async function runManualReview(code) {

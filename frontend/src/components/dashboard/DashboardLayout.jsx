@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { GUEST_AUTH_KEY, hasHistoryAccess } from "../../utils/authSession";
 import {
   handleApiError,
   runFileReview,
@@ -14,12 +15,13 @@ import LiveReviewPanel from "./LiveReviewPanel";
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHistoryView = location.pathname.endsWith("/history");
   const {
-    isAuthenticated,
     isGuestMode,
     repos,
     fetchingRepos,
-    disconnectGitHub,
+    logout,
   } = useAuth();
 
   const [activeTab, setActiveTab] = useState("paste");
@@ -39,6 +41,16 @@ export default function DashboardLayout() {
     navigate("/login");
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem(GUEST_AUTH_KEY);
+    logout();
+    navigate("/login", { replace: true });
+  };
+
+  if (isHistoryView && !hasHistoryAccess()) {
+    return <Navigate to="/login" replace />;
+  }
+
   const toggleDropdown = () => {
     if (fetchingRepos) return;
     setDropdownOpen((prev) => !prev);
@@ -54,10 +66,11 @@ export default function DashboardLayout() {
   };
 
   const handleDisconnect = () => {
-    disconnectGitHub();
+    logout();
     setSelectedRepo("");
     setDropdownOpen(false);
     if (activeTab === "github") setActiveTab("paste");
+    navigate("/login", { replace: true });
   };
 
   const handleFilesAdd = (files) => {
@@ -158,47 +171,55 @@ export default function DashboardLayout() {
       <div className="flex min-h-0 flex-1">
         <SidebarNav
           isGuestMode={isGuestMode}
-          isAuthenticated={isAuthenticated}
           activeTab={activeTab}
           onTabChange={handleTabChange}
           onConnectGitHub={handleConnectGitHub}
+          onLogout={handleLogout}
         />
 
-        <main className="flex min-h-0 flex-1 gap-4 p-4">
-          <WorkspacePanel
-            activeTab={activeTab}
-            isGuestMode={isGuestMode}
-            code={code}
-            onCodeChange={setCode}
-            selectedFiles={selectedFiles}
-            selectedZip={selectedZip}
-            uploadType={uploadType}
-            onFilesAdd={handleFilesAdd}
-            onFolderAdd={handleFolderAdd}
-            onZipSelect={handleZipSelect}
-            onRemoveFile={handleRemoveFile}
-            onClearZip={handleClearZip}
-            repos={repos}
-            selectedRepo={selectedRepo}
-            prUrl={prUrl}
-            dropdownOpen={dropdownOpen}
-            fetchingRepos={fetchingRepos}
-            loading={loading}
-            onSelectRepo={setSelectedRepo}
-            onToggleDropdown={toggleDropdown}
-            onCloseDropdown={() => setDropdownOpen(false)}
-            onPrUrlChange={setPrUrl}
-            onReviewRepo={handleReviewRepo}
-            onReviewPr={handleReviewPr}
-            onDisconnect={handleDisconnect}
-            getRepoTriggerLabel={getRepoTriggerLabel}
-            onRunAnalysis={handleRunAnalysis}
-            canRunAnalysis={canRunAnalysis}
-          />
+        <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {isHistoryView ? (
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <Outlet />
+            </div>
+          ) : (
+            <div className="flex min-h-0 flex-1 gap-4 p-4">
+              <WorkspacePanel
+                activeTab={activeTab}
+                isGuestMode={isGuestMode}
+                code={code}
+                onCodeChange={setCode}
+                selectedFiles={selectedFiles}
+                selectedZip={selectedZip}
+                uploadType={uploadType}
+                onFilesAdd={handleFilesAdd}
+                onFolderAdd={handleFolderAdd}
+                onZipSelect={handleZipSelect}
+                onRemoveFile={handleRemoveFile}
+                onClearZip={handleClearZip}
+                repos={repos}
+                selectedRepo={selectedRepo}
+                prUrl={prUrl}
+                dropdownOpen={dropdownOpen}
+                fetchingRepos={fetchingRepos}
+                loading={loading}
+                onSelectRepo={setSelectedRepo}
+                onToggleDropdown={toggleDropdown}
+                onCloseDropdown={() => setDropdownOpen(false)}
+                onPrUrlChange={setPrUrl}
+                onReviewRepo={handleReviewRepo}
+                onReviewPr={handleReviewPr}
+                onDisconnect={handleDisconnect}
+                getRepoTriggerLabel={getRepoTriggerLabel}
+                onRunAnalysis={handleRunAnalysis}
+                canRunAnalysis={canRunAnalysis}
+              />
 
-          <div className="w-[42%] min-w-[320px] shrink-0">
-            <LiveReviewPanel review={review} loading={loading} />
-          </div>
+              <div className="w-[42%] min-w-[320px] shrink-0">
+                <LiveReviewPanel review={review} loading={loading} />
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>

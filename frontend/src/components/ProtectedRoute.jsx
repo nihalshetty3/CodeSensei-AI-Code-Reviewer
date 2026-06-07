@@ -1,9 +1,8 @@
-import {Navigate} from "react-router-dom";
+import { Navigate } from "react-router-dom";
+import { hasHistoryAccess } from "../utils/authSession";
 
 export default function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
+  if (!hasHistoryAccess()) {
     return <Navigate to="/login" replace />;
   }
 

@@ -9,3 +9,7 @@ __pycache__/
 # Test files
 test.py 
 .DS_Store
+
+#RAG generate files
+ai-service/rag/vector.index
+ai-service/rag/documents.pkl

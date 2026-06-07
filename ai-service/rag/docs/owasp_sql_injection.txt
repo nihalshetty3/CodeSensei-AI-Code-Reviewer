@@ -1,0 +1,5 @@
+OWASP recommends parameterized queries.
+
+Never concatenate user input into SQL strings.
+
+Prepared statements reduce SQL injection risks.

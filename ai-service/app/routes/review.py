@@ -15,6 +15,15 @@ from app.services.github_service import (
     get_pr_files
 )
 from app.utils.language_detector import detect_language
+from app.schemas.explain_schema import (
+    ExplainRequest
+)
+
+from app.services.documentation_agent import (
+    explain_finding
+)
+
+from app.agents.orchestrator import orchestrate_review
 
 import tempfile
 import os
@@ -26,7 +35,7 @@ router = APIRouter()
 @router.post("/review")
 async def review_code(data: ReviewRequest):
 
-    review = generate_review(
+    review = orchestrate_review(
         data.code,
         data.language
     )
@@ -186,11 +195,39 @@ async def pr_review(
             file["patch"],
             language
         )
+        documentation=None
+        
+        review_lower = str(review).lower()
+        if(
+            "dependency" in review_lower
+            or "useeffect" in review_lower
+        ):
+            documentation_response = await explain_finding(
+                issue="dependency issue",
+                framework="react"
+            )
+            
+            documentation = documentation_response[
+                "documentation"
+            ]
+            
+        elif (
+            "sql injection" in review_lower
+        ):
+            documentation_response = await explain_finding(
+                issue="security issue",
+                framework = "security"
+            )
+            
+            documentation = documentation_response[
+                "documentation"
+            ]
         
         reviewed_files.append({
             "filename": file["filename"],
             "language" : language,
-            "review": review
+            "review": review,
+            "documentation": documentation
         })
         
     summary = generate_repositoryy_summary(
@@ -203,5 +240,21 @@ async def pr_review(
         "files_reviewed": len(reviewed_files),
         "summary": summary,
         "files" : reviewed_files
+    }
+    
+
+@router.post("/explain-finding")
+async def explain_issue(
+    data: ExplainRequest
+):
+    
+    response = await explain_finding(
+        data.issue,
+        data.framework
+    )
+    
+    return {
+        "success": True,
+        "result": response
     }
     

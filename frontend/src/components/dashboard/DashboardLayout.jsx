@@ -9,6 +9,11 @@ import {
   runManualReview,
   runPrReview,
 } from "../../utils/reviewApi";
+import {
+  saveGithubReviewToHistory,
+  savePasteReviewToHistory,
+  saveUploadReviewToHistory,
+} from "../../utils/reviewHistoryStore";
 import SidebarNav from "./SidebarNav";
 import WorkspacePanel from "./WorkspacePanel";
 import LiveReviewPanel from "./LiveReviewPanel";
@@ -120,7 +125,15 @@ export default function DashboardLayout() {
         result = await runFileReview({ uploadType, selectedFiles, selectedZip });
       }
 
+      if (!result) return;
+
       setReview(result);
+
+      if (activeTab === "upload") {
+        saveUploadReviewToHistory(result, { selectedFiles, selectedZip });
+      } else {
+        savePasteReviewToHistory(result);
+      }
     } catch (error) {
       handleApiError(error);
     } finally {
@@ -138,7 +151,10 @@ export default function DashboardLayout() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const result = await runGithubReview(selectedRepo, token);
+      if (!result) return;
+
       setReview(result);
+      saveGithubReviewToHistory(result, { selectedRepo, repos });
     } catch (error) {
       handleApiError(error);
     } finally {

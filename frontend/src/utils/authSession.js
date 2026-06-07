@@ -22,7 +22,11 @@ export function clearGuestSession() {
 }
 
 export function clearAllSessionData() {
+  const reviewHistory = localStorage.getItem("review_history");
   localStorage.removeItem(GUEST_AUTH_KEY);
   localStorage.removeItem("isAuthenticated");
   localStorage.clear();
+  if (reviewHistory) {
+    localStorage.setItem("review_history", reviewHistory);
+  }
 }

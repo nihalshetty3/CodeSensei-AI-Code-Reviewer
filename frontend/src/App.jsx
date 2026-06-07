@@ -4,7 +4,6 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 import AuthSuccess from "./components/AuthSuccess";
-
 export default function App() {
   return (
     <AuthProvider>
@@ -17,3 +16,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+export default App;
+

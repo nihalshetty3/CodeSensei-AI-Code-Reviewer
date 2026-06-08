@@ -35,7 +35,70 @@ function aiServiceErrorBody(err) {
 
 const reviewCode = proxyJsonToAi("/review");
 const prReview = proxyJsonToAi("/pr-review");
-const repositoryReview = proxyJsonToAi("/repository-review");
+
+const pool = require("../config/db");
+
+
+const repositoryReview = async (req, res) => {
+  try {
+    const response = await axios.post(
+      `${AI_SERVICE}/repository-review`,
+      req.body
+    );
+
+    const reviewData = response.data;
+
+    // github id comes from JWT
+    const githubId = req.user.githubid;
+
+    const userResult = await pool.query(
+      `
+      SELECT id
+      FROM users
+      WHERE github_id = $1
+      `,
+      [githubId]
+    );
+
+    if (userResult.rows.length > 0) {
+      const userId = userResult.rows[0].id;
+
+      await pool.query(
+        `
+        INSERT INTO review_history
+        (
+          user_id,
+          repository_name,
+          review_type,
+          bugs_found,
+          security_issues,
+          performance_issues,
+          code_quality_issues,
+          full_review
+        )
+        VALUES
+        ($1,$2,$3,$4,$5,$6,$7,$8)
+        `,
+        [
+          userId,
+          reviewData.repository,
+          "repository",
+          reviewData.summary?.total_bugs || 0,
+          reviewData.summary?.security_issues || 0,
+          reviewData.summary?.performance_issues || 0,
+          reviewData.summary?.code_quality_issues || 0,
+          JSON.stringify(reviewData),
+        ]
+      );
+    }
+
+    res.json(reviewData);
+  } catch (err) {
+    res
+      .status(aiServiceErrorStatus(err))
+      .json(aiServiceErrorBody(err));
+  }
+};
 
 const uploadReview = async (req, res) => {
   try {

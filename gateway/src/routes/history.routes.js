@@ -4,14 +4,16 @@ const router = express.Router();
 
 const {
   getReviewHistory,
-  getReviewById,
-  createReview,
+  
+  
+  getStats,
 } = require("../controllers/history.controller");
 
 router.get("/", getReviewHistory);
 
-router.get("/:id", getReviewById);
+router.get("/stats",getStats);
 
-router.post("/",createReview);
+
+
 
 module.exports = router;

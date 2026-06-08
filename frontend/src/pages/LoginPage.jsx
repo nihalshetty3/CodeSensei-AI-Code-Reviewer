@@ -1,12 +1,25 @@
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { GUEST_AUTH_KEY } from "../utils/authSession";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { connectGitHub } = useAuth();
+  const { continueAsGuest, clearLoginSession } = useAuth();
+
+  useEffect(() => {
+    localStorage.removeItem(GUEST_AUTH_KEY);
+    clearLoginSession();
+  }, [clearLoginSession]);
 
   const handleGitHubLogin = () => {
-       window.location.href="http://localhost:8000/api/auth/github";
+    window.location.href = "http://localhost:8000/api/auth/github";
+  };
+
+  const handleGuestContinue = () => {
+    localStorage.setItem(GUEST_AUTH_KEY, "true");
+    continueAsGuest();
+    navigate("/dashboard", { replace: true });
   };
 
   return (
@@ -57,9 +70,13 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-xs text-slate-500">
           Just want to try it?{" "}
-          <Link to="/dashboard" className="text-indigo-400 hover:text-indigo-300">
+          <button
+            type="button"
+            onClick={handleGuestContinue}
+            className="text-indigo-400 transition hover:text-indigo-300"
+          >
             Continue as Guest
-          </Link>
+          </button>
         </p>
       </div>
     </div>

@@ -3,9 +3,10 @@ import { useAuth } from "../context/AuthContext";
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isGuestAuthenticated, continueAsGuest } = useAuth();
 
   const handleStartReviewing = () => {
+    continueAsGuest();
     navigate("/dashboard");
   };
 
@@ -56,7 +57,7 @@ export default function LandingPage() {
             className="rounded-xl bg-indigo-600 px-8 py-3.5 text-sm font-semibold text-white shadow-[0_0_25px_rgba(99,102,241,0.45)] transition hover:bg-indigo-500"
           >
             Start Reviewing
-            {!isAuthenticated && (
+            {!isGuestAuthenticated && (
               <span className="ml-2 text-indigo-200/80">— Guest Mode</span>
             )}
           </button>

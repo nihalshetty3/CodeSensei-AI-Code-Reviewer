@@ -1,42 +1,53 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { DEV_DUMMY_REPOS, isLocalhost } from "../utils/apiHelpers";
 import { fetchGithubRepos } from "../utils/reviewApi";
+import {
+  clearAllSessionData,
+  clearGuestSession,
+  isGuestSessionActive,
+  setGuestSessionActive,
+} from "../utils/authSession";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    () => !!localStorage.getItem("token")
+  const [isGuestAuthenticated, setIsGuestAuthenticated] = useState(() =>
+    isGuestSessionActive()
   );
   const [repos, setRepos] = useState([]);
   const [fetchingRepos, setFetchingRepos] = useState(false);
 
-  const isGuestMode = !isAuthenticated;
+  const isGuestMode = !localStorage.getItem("token");
 
   const seedDummyRepos = useCallback(() => {
     setRepos(DEV_DUMMY_REPOS);
   }, []);
 
+  const logout = useCallback(() => {
+    clearAllSessionData();
+    setIsGuestAuthenticated(false);
+    setRepos([]);
+  }, []);
+
+  const clearLoginSession = useCallback(() => {
+    clearGuestSession();
+    setIsGuestAuthenticated(false);
+  }, []);
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get("token");
-if (urlToken) {
-  localStorage.setItem("token", urlToken);
-  setIsAuthenticated(true);
-
-  window.history.replaceState(
-    {},
-    document.title,
-    window.location.pathname
-  );
-}
-  }, [seedDummyRepos]);
+    if (urlToken) {
+      localStorage.setItem("token", urlToken);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     const isMockSession = token === "mock_dev_token";
 
-    if (isAuthenticated && repos.length === 0 && !isMockSession && token) {
+    if (token && repos.length === 0 && !isMockSession) {
       const loadRepos = async () => {
         try {
           setFetchingRepos(true);
@@ -45,9 +56,7 @@ if (urlToken) {
         } catch (error) {
           console.error("Failed to fetch repositories:", error);
           if (error.response?.status === 401) {
-            localStorage.removeItem("token");
-            setIsAuthenticated(false);
-            setRepos([]);
+            logout();
           }
         } finally {
           setFetchingRepos(false);
@@ -55,12 +64,16 @@ if (urlToken) {
       };
       loadRepos();
     }
-  }, [isAuthenticated, repos.length]);
+  }, [repos.length, logout]);
+
+  const continueAsGuest = useCallback(() => {
+    setGuestSessionActive();
+    setIsGuestAuthenticated(true);
+  }, []);
 
   const connectGitHub = useCallback(() => {
     if (isLocalhost()) {
       localStorage.setItem("token", "mock_dev_token");
-      setIsAuthenticated(true);
       seedDummyRepos();
       return;
     }
@@ -68,28 +81,33 @@ if (urlToken) {
   }, [seedDummyRepos]);
 
   const disconnectGitHub = useCallback(() => {
-    localStorage.removeItem("token");
-    setIsAuthenticated(false);
-    setRepos([]);
-  }, []);
+    logout();
+  }, [logout]);
 
   const value = useMemo(
     () => ({
-      isAuthenticated,
+      isGuestAuthenticated,
+      isAuthenticated: isGuestAuthenticated,
       isGuestMode,
       repos,
       fetchingRepos,
       setRepos,
       connectGitHub,
+      continueAsGuest,
+      clearLoginSession,
       disconnectGitHub,
+      logout,
     }),
     [
-      isAuthenticated,
+      isGuestAuthenticated,
       isGuestMode,
       repos,
       fetchingRepos,
       connectGitHub,
+      continueAsGuest,
+      clearLoginSession,
       disconnectGitHub,
+      logout,
     ]
   );
 

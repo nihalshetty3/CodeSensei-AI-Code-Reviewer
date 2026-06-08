@@ -1,5 +1,4 @@
 import asyncio
-from fastmcp import Client 
 
 async def explain_finding(
     issue,
@@ -24,6 +23,14 @@ async def explain_finding(
         return {
             "documentation":
             "No documentation source available."
+        }
+
+    try:
+        from fastmcp import Client
+    except ImportError:
+        return {
+            "documentation":
+            "Documentation lookup unavailable (fastmcp not installed)."
         }
         
     client = Client(

@@ -2,8 +2,8 @@
 - From root 
   npm run dev
 
-- Local RAG testing
-cd ai-service
+- Local RAG testing:
+(cd ai-service) -> 
 python chat_rag.py
 
 Full working in: http://localhost:5173

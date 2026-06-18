@@ -10,51 +10,72 @@ client = Groq(
 )
 
 def cleaned_review(review):
-    
+
+    print("\n================ REVIEW RECEIVED =================")
+    print(type(review))
+    print(json.dumps(review, indent=2))
+    print("==================================================\n")
+
     categories = [
-        "bugs", 
+        "bugs",
         "security",
         "performance",
         "code_quality"
     ]
-    
-    cleaned= {}
-    
+
+    cleaned = {}
+
     for category in categories:
-        
+
         cleaned[category] = []
-        
+
         seen_issues = set()
-        
-        issues = review.get(category , [])
-        
+
+        issues = review.get(category, [])
+
+        print(f"\n========== CATEGORY: {category} ==========")
+        print("Issues Type:", type(issues))
+        print("Issues Value:", issues)
+
         for issue in issues:
-            
-            issue_text = issue.get("issue" , "").strip()
-            
-            explanation =( 
-            issue.get("explaination" , "")
-            or issue.get("explanation")
-            or ""
+
+            print("\n----- ISSUE START -----")
+            print("Issue Type:", type(issue))
+            print("Issue Value:", issue)
+
+            if not isinstance(issue, dict):
+                print("INVALID ISSUE DETECTED:", issue)
+                print("Skipping...")
+                continue
+
+            issue_text = issue.get("issue", "").strip()
+
+            explanation = (
+                issue.get("explaination", "")
+                or issue.get("explanation", "")
+                or ""
             ).strip()
-            
-            fix = issue.get("fix" , "").strip()
-            
-            severity = issue.get("severity" , "low").lower()
-            
-            line = issue.get("line" , 0)
-            
-            #skip if issues are empty
-            
+
+            fix = issue.get("fix", "").strip()
+
+            severity = issue.get("severity", "low").lower()
+
+            line = issue.get("line", 0)
+
+            print("Issue Text:", issue_text)
+            print("Severity:", severity)
+            print("Line:", line)
+
             if not issue_text:
+                print("Skipped: Empty issue")
                 continue
-            
-            # remove duplicates
+
             if issue_text in seen_issues:
+                print("Skipped: Duplicate issue")
                 continue
-            
+
             seen_issues.add(issue_text)
-            
+
             if severity not in [
                 "low",
                 "medium",
@@ -62,7 +83,7 @@ def cleaned_review(review):
                 "critical"
             ]:
                 severity = "low"
-                
+
             cleaned[category].append({
                 "line": line,
                 "severity": severity,
@@ -70,8 +91,17 @@ def cleaned_review(review):
                 "explanation": explanation,
                 "fix": fix
             })
-    
+
+            print("Added Successfully")
+
+        print(f"========== END CATEGORY: {category} ==========\n")
+
+    print("\n================ CLEANED RESULT =================")
+    print(json.dumps(cleaned, indent=2))
+    print("=================================================\n")
+
     return cleaned
+
 
 def generate_repositoryy_summary(reviewed_files):
     

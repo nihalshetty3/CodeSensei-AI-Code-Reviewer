@@ -39,6 +39,7 @@ const prReview = proxyJsonToAi("/pr-review");
 const pool = require("../config/db");
 
 
+
 const repositoryReview = async (req, res) => {
   try {
     const response = await axios.post(
@@ -48,20 +49,56 @@ const repositoryReview = async (req, res) => {
 
     const reviewData = response.data;
 
-    // github id comes from JWT
+    
     const githubId = req.user.githubid;
 
-    const userResult = await pool.query(
-      `
-      SELECT id
-      FROM users
-      WHERE github_id = $1
-      `,
-      [githubId]
-    );
+      console.log("==============");
+console.log("REQ USER");
+console.log(req.user);
+console.log("USER ID:", req.user.userID);
+console.log("==============");
 
-    if (userResult.rows.length > 0) {
-      const userId = userResult.rows[0].id;
+
+
+
+  
+      const userId = req.user.userID;
+
+      console.log("userId type:", typeof userID);
+    const bugsFound =
+  reviewData.summary?.total_bugs || 0;
+
+const securityIssues =
+  reviewData.summary?.security_issues || 0;
+
+const performanceIssues =
+  reviewData.summary?.performance_issues || 0;
+
+const codeQualityIssues =
+  reviewData.files?.reduce(
+    (count, file) =>
+      count + (file.review?.code_quality?.length || 0),
+    0
+  ) || 0;
+
+
+      const reviewSummary =
+      `Bugs: ${bugsFound}, Security: ${securityIssues}, ` +
+      `Performance: ${performanceIssues}, Code Quality: ${codeQualityIssues}`;
+      console.log("INSERT VALUES:");
+console.log([
+  userId,
+  req.body.repo_url || "Repository Review",
+  null,
+  "repository",
+  bugsFound,
+  securityIssues,
+  performanceIssues,
+  codeQualityIssues,
+  reviewSummary,
+  JSON.stringify(reviewData)
+]);
+
 
       await pool.query(
         `
@@ -69,36 +106,42 @@ const repositoryReview = async (req, res) => {
         (
           user_id,
           repository_name,
+          pr_number,
           review_type,
           bugs_found,
           security_issues,
           performance_issues,
           code_quality_issues,
+          review_summary,
           full_review
         )
         VALUES
-        ($1,$2,$3,$4,$5,$6,$7,$8)
+        ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
         `,
         [
           userId,
-          reviewData.repository,
+          req.body.repo_url||"Repository Review",
+          null,
           "repository",
-          reviewData.summary?.total_bugs || 0,
-          reviewData.summary?.security_issues || 0,
-          reviewData.summary?.performance_issues || 0,
-          reviewData.summary?.code_quality_issues || 0,
+          bugsFound,
+          securityIssues,
+          performanceIssues,
+          codeQualityIssues,
+          reviewSummary,
           JSON.stringify(reviewData),
         ]
       );
-    }
+    
 
     res.json(reviewData);
-  } catch (err) {
+  }
+   catch (err) {
     res
       .status(aiServiceErrorStatus(err))
       .json(aiServiceErrorBody(err));
   }
-};
+}
+
 
 const uploadReview = async (req, res) => {
   try {

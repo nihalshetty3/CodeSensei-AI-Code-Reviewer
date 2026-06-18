@@ -4,15 +4,16 @@ const router = express.Router();
 
 const {
   getReviewHistory,
-  
-  
-  getStats,
+  getReviewStats,
+  clearReviewHistory
 } = require("../controllers/history.controller");
+const verifyToken = require("../middleware/auth.middleware");
 
-router.get("/", getReviewHistory);
+router.get("/", verifyToken,getReviewHistory);
 
-router.get("/stats",getStats);
+router.get("/stats",verifyToken,getReviewStats);
 
+router.delete("/delete",verifyToken,clearReviewHistory);
 
 
 

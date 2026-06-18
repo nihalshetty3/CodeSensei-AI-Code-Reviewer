@@ -7,6 +7,7 @@ import AuthSuccess from "./components/AuthSuccess";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ReviewHistoryDashboard from "./components/ReviewHistoryDashboard";
 import { hasHistoryAccess } from "./utils/authSession";
+import RagTest from "./pages/RagTest"
 
 function HistoryRedirect() {
   if (!hasHistoryAccess()) {
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="/history" element={<HistoryRedirect />} />
 
         <Route path="/auth/success" element={<AuthSuccess />} />
+        <Route path="/rag-test" element={<RagTest />} />
       </Routes>
     </AuthProvider>
   );

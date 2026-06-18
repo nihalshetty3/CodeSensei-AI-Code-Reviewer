@@ -1,6 +1,7 @@
 # Running commands
 - From root 
-  npm run dev
+  npm run dev & 
+  uvicorn app.main:app --reload
 
 - Local RAG testing:
 (cd ai-service) -> 

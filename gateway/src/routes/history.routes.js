@@ -4,14 +4,17 @@ const router = express.Router();
 
 const {
   getReviewHistory,
-  getReviewById,
-  createReview,
+  getReviewStats,
+  clearReviewHistory
 } = require("../controllers/history.controller");
+const verifyToken = require("../middleware/auth.middleware");
 
-router.get("/", getReviewHistory);
+router.get("/", verifyToken,getReviewHistory);
 
-router.get("/:id", getReviewById);
+router.get("/stats",verifyToken,getReviewStats);
 
-router.post("/",createReview);
+router.delete("/delete",verifyToken,clearReviewHistory);
+
+
 
 module.exports = router;

@@ -3,6 +3,7 @@ import os
 load_dotenv(".env")
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from app.routes.review import router as review_router
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.github_webhook import router as webhook_router
@@ -28,13 +29,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount(
+    "/docs",
+    StaticFiles(directory="rag/docs"),
+    name="docs"
+)
+
 app.include_router(review_router)
 app.include_router(webhook_router)
 app.include_router(rag_router)
 @app.get("/")
 def home():
     return {"message" : "AI service running"}
-
-app.include_router(
-    webhook_router
-)

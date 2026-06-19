@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
   Bug,
   Calendar,
@@ -11,10 +10,12 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+
 import {
-  REVIEW_HISTORY_KEY,
-  getStoredReviewHistory,
-} from "../utils/reviewHistoryStore";
+  getReviewHistory,
+  getReviewStats,
+  clearReviewHistory,
+} from "../utils/historyApi";
 
 function formatReviewDate(isoString) {
   const date = new Date(isoString);
@@ -146,29 +147,40 @@ function ReviewDetailModal({ review, onClose }) {
 }
 
 export default function ReviewHistoryDashboard() {
-  const location = useLocation();
+
   const [reviews, setReviews] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
 
-  const refreshFromStorage = useCallback(() => {
-    setReviews(getStoredReviewHistory());
-  }, []);
+   const loadHistory = async () => {
+  try {
 
-  useEffect(() => {
-    refreshFromStorage();
-  }, [location.pathname, refreshFromStorage]);
+    const data = await getReviewHistory();
 
-  useEffect(() => {
-    const handleHistoryUpdate = () => refreshFromStorage();
-    window.addEventListener("review-history-updated", handleHistoryUpdate);
-    window.addEventListener("storage", handleHistoryUpdate);
+    const formatted = data.map((item) => ({
+      id: item.id,
+      repository: item.repository_name,
+      prNumber: item.pr_number,
+      reviewDate: item.review_date,
+      bugsFound: item.bugs_found,
+      securityIssues: item.security_issues,
+      performanceIssues: item.performance_issues,
+      codeQualityIssues: item.code_quality_issues,
+      reviewSummary: item.review_summary,
+      fullAnalysis: JSON.stringify(item.full_review, null, 2),
+    }));
 
-    return () => {
-      window.removeEventListener("review-history-updated", handleHistoryUpdate);
-      window.removeEventListener("storage", handleHistoryUpdate);
-    };
-  }, [refreshFromStorage]);
+    setReviews(formatted);
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+useEffect(() => {
+  loadHistory();
+}, []);
+
 
   useEffect(() => {
     if (!selectedReview) return;
@@ -181,35 +193,66 @@ export default function ReviewHistoryDashboard() {
     return () => window.removeEventListener("keydown", handleEscape);
   }, [selectedReview]);
 
-  const metrics = useMemo(
-    () => ({
-      totalReviews: reviews.length,
-      totalBugs: reviews.reduce((sum, r) => sum + (r.bugsFound ?? 0), 0),
-      totalSecurity: reviews.reduce((sum, r) => sum + (r.securityIssues ?? 0), 0),
-    }),
-    [reviews]
-  );
+ const [metrics, setMetrics] = useState({
+  totalReviews: 0,
+  totalBugs: 0,
+  totalSecurity: 0,
+});
 
-  const handleRefresh = () => {
-    if (isRefreshing) return;
-    setIsRefreshing(true);
 
-    setTimeout(() => {
-      refreshFromStorage();
-      setIsRefreshing(false);
-    }, 900);
-  };
 
-  const handleClearHistory = () => {
+  const loadStats = async () => {
+  try {
+
+    const stats = await getReviewStats();
+
+    setMetrics({
+      totalReviews: Number(stats.total_reviews),
+      totalBugs: Number(stats.total_bugs),
+      totalSecurity: Number(stats.total_security),
+    });
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+useEffect(() => {
+  loadStats();
+}, []);
+
+const handleRefresh = async () => {
+
+  if (isRefreshing) return;
+
+  setIsRefreshing(true);
+
+  try {
+    await loadHistory();
+    await loadStats();
+  } catch (err) {
+    console.error(err);
+  }
+
+  setIsRefreshing(false);
+};
+
+  const handleClearHistory = async() => {
     const confirmed = window.confirm(
       "Are you sure you want to permanently delete all code review history logs? This cannot be undone."
     );
 
     if (!confirmed) return;
+      await clearReviewHistory();
+      setReviews([]);
+    setMetrics({
+  totalReviews: 0,
+  totalBugs: 0,
+  totalSecurity: 0,
+});
 
-    localStorage.removeItem(REVIEW_HISTORY_KEY);
-    setReviews([]);
-    setSelectedReview(null);
+setSelectedReview(null);
+      
   };
 
   return (
@@ -386,3 +429,4 @@ export default function ReviewHistoryDashboard() {
     </div>
   );
 }
+

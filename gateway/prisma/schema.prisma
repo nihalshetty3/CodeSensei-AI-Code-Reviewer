@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int             @id @default(autoincrement())
+  github_id  String?         @unique @db.VarChar(255)
+  username   String?         @db.VarChar(255)
+  created_at DateTime?       @default(now()) @db.Timestamp(6)
+  reviews    ReviewHistory[]
+
+  @@map("users")
+}
+
+model ReviewHistory {
+  id                  Int       @id @default(autoincrement())
+  user_id             Int
+  repository_name     String
+  pr_number           Int?
+  review_type         String?   @db.VarChar(50)
+  review_date         DateTime? @default(now()) @db.Timestamp(6)
+  bugs_found          Int?      @default(0)
+  security_issues     Int?      @default(0)
+  performance_issues  Int?      @default(0)
+  code_quality_issues Int?      @default(0)
+  review_summary      String?
+  full_review         Json?
+  user                User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("review_history")
+}

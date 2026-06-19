@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { MessageSquare } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 export default function LandingPage() {
@@ -98,6 +99,14 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+      <Link
+        to="/rag-test"
+        className="group fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full border border-indigo-400/20 bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:scale-110 hover:from-indigo-500 hover:to-purple-500 hover:shadow-purple-500/50 active:scale-95"
+        title="Test RAG Engine"
+      >
+        <MessageSquare className="h-6 w-6 transition-transform group-hover:rotate-6" />
+      </Link>
     </div>
   );
 }

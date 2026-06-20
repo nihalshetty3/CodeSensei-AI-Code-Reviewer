@@ -1,7 +1,20 @@
 # Running commands
 - From root 
-  npm run dev & 
-  uvicorn app.main:app --reload
+
+  npm run dev 
+
+  
+- Inside ai-service   
+  
+  uvicorn app.main:app --reload --port 8001
+
+  
+- From gateway
+
+node src/sever.js
+
+
+
 
 - Local RAG testing:
 (cd ai-service) -> 

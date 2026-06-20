@@ -1,0 +1,10 @@
+fastapi>=0.120.0
+uvicorn[standard]>=0.38.0
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+groq>=1.0.0
+PyGithub>=2.8.0
+GitPython>=3.1.0
+python-multipart>=0.0.20
+httpx>=0.28.0
+PyJWT>=2.0.0

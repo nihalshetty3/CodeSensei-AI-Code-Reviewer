@@ -1,3 +1,13 @@
+# Running commands
+- From root 
+  npm run dev
+
+- Local RAG testing:
+(cd ai-service) -> 
+python chat_rag.py
+
+Full working in: http://localhost:5173
+
 # CodeSensei – AI Code Reviewer
 
 CodeSensei is an agentic AI-powered code review platform designed to act like an experienced software engineer reviewing your code. Instead of waiting for a teammate or manually debugging issues, developers can receive instant feedback on bugs, security concerns, performance problems, and code quality issues.
@@ -181,6 +191,7 @@ Leverage Model Context Protocol (MCP) servers to connect with:
 * Knowledge bases
 
 This will enable deeper repository understanding and agentic code review workflows.
+<img width="213" height="495" alt="image" src="https://github.com/user-attachments/assets/3878a8f7-d058-48cd-99e0-d23e2c166015" />
 
 
 

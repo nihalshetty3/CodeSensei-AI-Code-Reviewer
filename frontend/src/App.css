@@ -349,30 +349,29 @@ body {
 
   opacity: 0.9;
 }
+
 .submit-btn {
+  width: 180px;
 
-  background: linear-gradient(135deg, #7b61ff, #9b6dff);
-
-  color: white;
+  height: 60px;
 
   border: none;
 
-  width: 220px;   /* longer */
-  height: 56px;
-
   border-radius: 14px;
 
-  font-size: 15px;
-  font-weight: 600;
-  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+
+  color: white;
+
   cursor: pointer;
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  font-size: 15px;
 
-  transition: 0.3s ease;
+  font-weight: 700;
+
+  transition: 0.2s;
 }
+
 .submit-btn:hover {
   transform: translateY(-2px);
 
@@ -443,7 +442,7 @@ body {
 .review-card {
   width: 100%;
 
-  min-height: 900px;
+  min-height: 700px;
 
   background: linear-gradient(145deg, #0f172a, #0d1526);
 
@@ -613,7 +612,7 @@ body {
 .github-review-card{
   margin-top:25px;
   width:100%;
-  max-width:800px;
+  max-width:600px;
 
   padding:24px;
 
@@ -685,9 +684,9 @@ body {
   margin-top: 24px;
 
   width: 100%;
-  max-width: 700px;
+  max-width: 550px;
 
-  padding: 22px;
+  padding: 24px;
 
   background: rgba(255,255,255,0.04);
 

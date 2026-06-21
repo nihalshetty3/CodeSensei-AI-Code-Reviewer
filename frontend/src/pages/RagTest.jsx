@@ -32,7 +32,7 @@ export default function RagTest() {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/rag/query",
+        "http://localhost:8001/rag/reviews",
         {
           method: "POST",
           headers: {

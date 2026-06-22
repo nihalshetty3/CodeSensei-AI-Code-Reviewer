@@ -36,7 +36,7 @@ function aiServiceErrorBody(err) {
 const reviewCode = proxyJsonToAi("/review");
 const prReview = proxyJsonToAi("/pr-review");
 
-const pool = require("../config/db");
+const prisma = require("../config/prisma");
 
 
 
@@ -100,37 +100,23 @@ console.log([
 ]);
 
 
-      await pool.query(
-        `
-        INSERT INTO review_history
-        (
-          user_id,
-          repository_name,
-          pr_number,
-          review_type,
-          bugs_found,
-          security_issues,
-          performance_issues,
-          code_quality_issues,
-          review_summary,
-          full_review
-        )
-        VALUES
-        ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-        `,
-        [
-          userId,
-          req.body.repo_url||"Repository Review",
-          null,
-          "repository",
-          bugsFound,
-          securityIssues,
-          performanceIssues,
-          codeQualityIssues,
-          reviewSummary,
-          JSON.stringify(reviewData),
-        ]
-      );
+   await prisma.reviewHistory.create({
+  data: {
+    user_id: userId,
+    repository_name: req.body.repo_url || "Repository Review",
+    pr_number: null,
+    review_type: "repository",
+
+    bugs_found: bugsFound,
+    security_issues: securityIssues,
+    performance_issues: performanceIssues,
+    code_quality_issues: codeQualityIssues,
+
+    review_summary: reviewSummary,
+
+    full_review: reviewData
+  }
+});
     
 
     res.json(reviewData);

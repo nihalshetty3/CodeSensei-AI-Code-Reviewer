@@ -13,6 +13,7 @@ export default function RagTest() {
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [sessionId] = useState(crypto.randomUUID());
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -32,14 +33,15 @@ export default function RagTest() {
 
     try {
       const response = await fetch(
-        "http://localhost:8001/rag/reviews",
+       "http://localhost:8001/rag/reviews/chat",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            query: userQuestion,
+            session_id: sessionId,
+            message: userQuestion,
           }),
         }
       );

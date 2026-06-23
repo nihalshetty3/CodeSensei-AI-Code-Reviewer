@@ -8,6 +8,8 @@ from app.routes.review import router as review_router
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.github_webhook import router as webhook_router
 from app.routes.rag import router as rag_router
+from app.routes.review_rag import router as review_rag_router
+from app.routes.review_chat import router as review_chat_router
 
 app = FastAPI()
 app.add_middleware(
@@ -38,6 +40,9 @@ app.mount(
 app.include_router(review_router)
 app.include_router(webhook_router)
 app.include_router(rag_router)
+app.include_router(review_rag_router)
+app.include_router(review_chat_router)
+
 @app.get("/")
 def home():
     return {"message" : "AI service running"}

@@ -1,5 +1,6 @@
 from groq import Groq
 from dotenv import load_dotenv
+from rag.ollama_service import answer_with_ollama
 import os
 
 load_dotenv()
@@ -69,15 +70,29 @@ Answer using the context and conversation history.
         print(msg)
     print("============================\n")
 
-    response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=messages,
-        temperature=0.2
-    )
-
-    return (
-        response
-        .choices[0]
-        .message
-        .content
-    )
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=messages,
+            temperature=0.2
+        )
+        
+        return {
+            "answer":
+                response.choices[0].message.content,
+            "provider": "groq"
+        }
+    
+    except Exception as e:
+        
+        print(f"Groq Failed: {e}")
+        print("Switching to Ollama")
+        
+        ollama_answer = answer_with_ollama(
+            messages
+        )
+        
+        return {
+            "answer": ollama_answer,
+            "provider": "ollama"
+        }

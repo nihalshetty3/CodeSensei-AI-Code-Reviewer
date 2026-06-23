@@ -24,11 +24,13 @@ def review_chat(request: ChatRequest):
         request.session_id
     )
     
-    answer=answer_with_rag(
+    result = answer_with_rag(
         request.message,
         context,
         history
     )
+    answer = result["answer"]
+    provider = result["provider"]
     
     save_message(
         request.session_id,
@@ -43,5 +45,6 @@ def review_chat(request: ChatRequest):
     )
     
     return {
-        "answer": answer
+        "answer": answer,
+        "provider": provider
     }

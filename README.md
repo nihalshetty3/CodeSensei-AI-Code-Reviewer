@@ -20,6 +20,9 @@ node src/sever.js
 (cd ai-service) -> 
 python chat_rag.py
 
+# To test Ollama
+- ollama serve
+
 Full working in: http://localhost:5173
 
 # CodeSensei – AI Code Reviewer

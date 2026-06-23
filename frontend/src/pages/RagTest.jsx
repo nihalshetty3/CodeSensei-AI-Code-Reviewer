@@ -21,12 +21,12 @@ export default function RagTest() {
     const userQuestion = query;
 
     setMessages((prev) => [
-      ...prev,
-      {
-        role: "user",
-        content: userQuestion,
-      },
-    ]);
+        ...prev,
+        {
+          role: "user",
+          content: userQuestion,
+        },
+      ]);
 
     setQuery("");
     setLoading(true);
@@ -53,6 +53,7 @@ export default function RagTest() {
         {
           role: "assistant",
           content: data.answer,
+          provider: data.provider,
           source: data.source,
           documents: data.documents || [],
         },
@@ -147,6 +148,13 @@ export default function RagTest() {
                   <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-200">
                     {msg.content}
                   </div>
+                  {msg.provider && (
+  <div className="mt-3">
+    <span className="inline-flex items-center gap-1 rounded-lg border border-slate-700/60 bg-slate-950/60 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+      Provider: {msg.provider}
+    </span>
+  </div>
+)}
 
                   {msg.role === "assistant" && (msg.source || msg.documents?.length > 0) && (
                     <div className="mt-4 space-y-3 border-t border-slate-800/60 pt-4">

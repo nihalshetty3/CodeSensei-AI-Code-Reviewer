@@ -15,7 +15,7 @@ import {
   getReviewHistory,
   getReviewStats,
   clearReviewHistory,
-} from "../utils/historyApi";
+} from "../utils/historyApi.";
 
 function formatReviewDate(isoString) {
   const date = new Date(isoString);

@@ -5,7 +5,7 @@ const cors = require("cors");
 const session = require("express-session");
 const passport = require("passport");
 const GitHubStrategy = require("passport-github2").Strategy;
-require("./config/db");
+// require("./config/db");
 
 const reviewRoutes = require("./routes/review.routes");
 const githubAuthRoutes = require("./routes/githubAuth.routes");
@@ -94,4 +94,4 @@ server.on("error", (err) => {
     process.exit(1);
   }
   throw err;
-});
+});``

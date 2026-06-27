@@ -5,9 +5,8 @@ const cors = require("cors");
 const session = require("express-session");
 const passport = require("passport");
 const GitHubStrategy = require("passport-github2").Strategy;
-const pool = require("./config/db");
+require("./config/db");
 
-// Routes
 const reviewRoutes = require("./routes/review.routes");
 const githubAuthRoutes = require("./routes/githubAuth.routes");
 const githubRepoRoutes = require("./routes/githubRepo.routes");
@@ -16,28 +15,27 @@ const historyRoutes = require("./routes/history.routes");
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-// 1. Core Middleware (CORS & Body Parser)
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+].filter(Boolean);
+
 app.use(
   cors({
     origin(origin, callback) {
-      if (
-        !origin ||
-        /^http:\/\/localhost:\d+$/.test(origin) ||
-        /^http:\/\/127\.0\.0\.1:\d+$/.test(origin)
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
       }
+      callback(new Error("Not allowed by CORS"));
     },
-    methods: ["GET", "POST","PUT","DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
 
 app.use(express.json());
 
-// 2. Session & Passport Middleware
 app.use(
   session({
     secret: process.env.JWT_SECRET || "dev-session-secret",
@@ -49,30 +47,36 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// 3. Passport GitHub Strategy Configuration
 if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
   passport.use(
     new GitHubStrategy(
       {
         clientID: process.env.GITHUB_CLIENT_ID,
         clientSecret: process.env.GITHUB_CLIENT_SECRET,
-        callbackURL: "http://localhost:8000/api/auth/github/callback",
+        callbackURL:
+          process.env.GITHUB_CALLBACK_URL ||
+          "http://localhost:8000/api/auth/github/callback",
       },
-      function (accessToken, refreshToken, profile, done) {
+      (accessToken, refreshToken, profile, done) => {
         profile.accessToken = accessToken;
-        return done(null, profile);
+        done(null, profile);
       }
     )
   );
 } else if (process.env.NODE_ENV !== "production") {
-  console.log(
-    "[dev] GitHub OAuth skipped — localhost uses mock Connect GitHub. Add GITHUB_CLIENT_ID/SECRET to gateway/.env for real OAuth."
-  );
+  console.log("[dev] GitHub OAuth skipped.");
 }
 
-// 4. API Routes
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
 app.get("/", (req, res) => {
-  res.send("CodeSensei Gateway Running");
+  res.send("CodeSensei Gateway Running 🚀");
 });
 
 app.use("/api", reviewRoutes);
@@ -80,16 +84,13 @@ app.use("/api/auth", githubAuthRoutes);
 app.use("/api/github", githubRepoRoutes);
 app.use("/api/history", historyRoutes);
 
-// 5. Server Initialization & Port Handling
-const server = app.listen(PORT, "127.0.0.1", () => {
-  console.log(`Server running on http://127.0.0.1:${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Gateway running on port ${PORT}`);
 });
 
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
-    console.error(
-      `Port ${PORT} is already in use. Run: npm run predev (or: lsof -ti :${PORT} | xargs kill -9)`
-    );
+    console.error(`Port ${PORT} is already in use.`);
     process.exit(1);
   }
   throw err;
